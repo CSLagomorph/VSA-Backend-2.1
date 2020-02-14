@@ -65,7 +65,7 @@ namespace Scheduler
         private void OpenSQLConnection()
         {
 
-            myConnection = new SqlConnection("Data Source = 65.175.68.34; Initial Catalog = vsaDev; Persist Security Info = True; User ID = sa; Password = kD$wg&OUrhfC6AMMq6q5Xh"j);
+            myConnection = new SqlConnection("Data Source=65.175.68.34;Initial Catalog=vsaDev;Persist Security Info=True;User ID=sa;Password=H4ZXZy-vRZwL#9A");
         }
         #endregion
 

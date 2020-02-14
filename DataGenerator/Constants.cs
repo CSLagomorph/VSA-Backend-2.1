@@ -20,5 +20,7 @@ namespace DataGenerator
             FullTime = 1,
             PartTime = 2
         }
+
+        public string COMPUTER_ENG = "1";
     }
 }

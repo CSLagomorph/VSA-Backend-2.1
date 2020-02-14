@@ -1,9 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.960
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29519.181
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VaaApi", "VaaApi.csproj", "{1772D477-8FBB-4567-9AF4-A41888444B66}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D064B0A7-DC77-4D4E-9E93-66788572F814} = {D064B0A7-DC77-4D4E-9E93-66788572F814}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scheduler", "..\Algorithm-2.0-master\Scheduler.csproj", "{8C48265C-A39C-49C4-8ACD-71B6EB5F7980}"
 EndProject

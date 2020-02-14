@@ -61,7 +61,6 @@ namespace Scheduler {
             //Function Variables
             courseNetwork = JsonConvert.DeserializeObject<List<CourseNode>>(allCourses);
             List<CourseNode> smaller = JsonConvert.DeserializeObject<List<CourseNode>>(prereqs);
-
             BuildIndex(); //Builds the Index for the courses for O(1) lookup
 
             for (int i = 0; i < smaller.Count; i++) //iterates over the entire string of prerequisite information
