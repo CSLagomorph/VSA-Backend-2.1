@@ -8,3 +8,12 @@ C:\Users\masta\OneDrive\Documents\Virtual Advisor\Algorithm-2.0-master\obj\Debug
 C:\Users\masta\OneDrive\Documents\Virtual Advisor\Algorithm-2.0-master\obj\Debug\Scheduler.csprojAssemblyReference.cache
 C:\Users\masta\OneDrive\Documents\Virtual Advisor\Algorithm-2.0-master\obj\Debug\Scheduler.csproj.CoreCompileInputs.cache
 C:\Users\masta\OneDrive\Documents\Virtual Advisor\Algorithm-2.0-master\obj\Debug\Scheduler.csproj.CopyComplete
+C:\Users\cj\Source\Repos\VSA-Backend-2.1\Algorithm-2.0-master\Algorithm-2.0-master\bin\Debug\CourseNetwork.cs
+C:\Users\cj\Source\Repos\VSA-Backend-2.1\Algorithm-2.0-master\Algorithm-2.0-master\bin\Debug\Scheduler.exe
+C:\Users\cj\Source\Repos\VSA-Backend-2.1\Algorithm-2.0-master\Algorithm-2.0-master\bin\Debug\Scheduler.pdb
+C:\Users\cj\Source\Repos\VSA-Backend-2.1\Algorithm-2.0-master\Algorithm-2.0-master\bin\Debug\Newtonsoft.Json.dll
+C:\Users\cj\Source\Repos\VSA-Backend-2.1\Algorithm-2.0-master\Algorithm-2.0-master\bin\Debug\Newtonsoft.Json.xml
+C:\Users\cj\Source\Repos\VSA-Backend-2.1\Algorithm-2.0-master\Algorithm-2.0-master\obj\Debug\Scheduler.csprojAssemblyReference.cache
+C:\Users\cj\Source\Repos\VSA-Backend-2.1\Algorithm-2.0-master\Algorithm-2.0-master\obj\Debug\Scheduler.csproj.CopyComplete
+C:\Users\cj\Source\Repos\VSA-Backend-2.1\Algorithm-2.0-master\Algorithm-2.0-master\obj\Debug\Scheduler.exe
+C:\Users\cj\Source\Repos\VSA-Backend-2.1\Algorithm-2.0-master\Algorithm-2.0-master\obj\Debug\Scheduler.pdb

@@ -116,6 +116,14 @@ namespace Scheduler {
             classesScheduled += k;
         }
 
+        // Adds a job to this machine node. Updates that number of credits scheudled on the node
+        // the number of course on the node and the number of core credits scheduled on this node.
+        public void AddClassesScheduled(Job j) { 
+            classesScheduled += 1;
+            creditsScheduled += j.GetNumCredits();
+            majorCreditsScheduled += j.GetCoreCourse() ? j.GetNumCredits() : 0;
+        }
+
         //------------------------------------------------------------------------------
         // 
         // adds a new machine to node

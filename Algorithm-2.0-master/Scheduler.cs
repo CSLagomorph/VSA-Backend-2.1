@@ -113,8 +113,18 @@ namespace Scheduler {
         private void InitNetwork()
         {
             //VARIABLES
-            string rawpreqs = DBPlugin.ExecuteToString("Select CourseID, GroupID, PrerequisiteID, PrerequisiteCourseID from Prerequisite for JSON AUTO");
-            string rawcourses = DBPlugin.ExecuteToString("select CourseID from Course for JSON AUTO;");
+            // These queries are so general and non-specific >:(
+            // TODO:    Going to have to do a join on courses to receive the Maxcredits so we can store in the course object and then in turn store in the job.
+            //          This requires changing the file of the CourseObject and on lines: 498 and around it. 
+            //          Also gives you a chance to fix this damn query.
+            //string rawpreqs = DBPlugin.ExecuteToString("Select CourseID, GroupID, PrerequisiteID, PrerequisiteCourseID from Prerequisite for JSON AUTO");
+            string rawpreqs = DBPlugin.ExecuteToString("SELECT p.CourseID, MaxCredit as credits, GroupID, PrerequisiteID, PrerequisiteCourseID " +
+                "FROM Prerequisite as p " +
+                "LEFT JOIN Course as c ON c.CourseID = p.CourseID " +
+                "FOR JSON PATH");
+            string rawcourses = DBPlugin.ExecuteToString("SELECT CourseID, MaxCredit as credits " +
+                "FROM Course " +
+                "FOR JSON PATH");
             //NETWORK BUILD
             network = new CourseNetwork(rawcourses, rawpreqs);
             network.BuildNetwork();
@@ -245,16 +255,26 @@ namespace Scheduler {
         //------------------------------------------------------------------------------
         public void InitDegreePlan(int majorID, int schoolID)
         {
-            string query = "select CourseID from AdmissionRequiredCourses where MajorID ="
-                            + majorID + " and SchoolID = " + schoolID + " order by CourseID ASC ";
+            //string oldquery = "select CourseID from AdmissionRequiredCourses where MajorID ="
+            //                + majorID + " and SchoolID = " + schoolID + " order by CourseID ASC ";
+
+            string query = "SELECT arc.CourseID as CID, c.MaxCredit as Credits " +
+                "FROM AdmissionRequiredCourses as arc " +
+                "LEFT JOIN Course as c ON c.CourseID = arc.CourseID " +
+                "WHERE MajorID = " + majorID + " and SchoolID = " + schoolID;
+
             planBuilder(DBPlugin.ExecuteToDT(query));
 
         }
 
         private void InitDegreePlan()
         {
-            string query = "select CourseID from AdmissionRequiredCourses where MajorID ="
-                + preferences.getMajor() + " and SchoolID = " + preferences.getSchool() + " order by CourseID ASC";
+            //string oldQuery = "select CourseID from AdmissionRequiredCourses where MajorID ="
+            //    + preferences.getMajor() + " and SchoolID = " + preferences.getSchool() + " order by CourseID ASC";
+            string query = "SELECT arc.CourseID as CID, c.MaxCredit as Credits " +
+                "FROM AdmissionRequiredCourses as arc " +
+                "LEFT JOIN Course as c ON c.CourseID = arc.CourseID " +
+                "WHERE MajorID = " + preferences.getMajor() + " and SchoolID = " + preferences.getSchool();
             planBuilder(DBPlugin.ExecuteToDT(query));
         }
 
@@ -264,10 +284,12 @@ namespace Scheduler {
         //------------------------------------------------------------------------------
         private void planBuilder(DataTable dt)
         {
+            bool CORE_CLASS = true;
             List<Job> courseNums = new List<Job>();
             foreach (DataRow row in dt.Rows)
             {
-                Job job = new Job((int)row.ItemArray[0]);
+                // Need to store more information that we get from the DT
+                Job job = new Job((int)row.ItemArray[0], (int)row.ItemArray[1], CORE_CLASS);
                 courseNums.Add(job);
             }
             myPlan = new DegreePlan(courseNums);
@@ -292,7 +314,16 @@ namespace Scheduler {
         //------------------------------------------------------------------------------
         private void InitMachines()
         {
-            string query = "select CourseID, StartTimeID, EndTimeID, DayID, QuarterID, SectionID from CourseTime order by CourseID ASC;";
+            
+            // This query returns ~2000 rows of course info. We pre-process a lot of info
+            // with adding jobs and decidingg where to place maachinens/jobs.
+
+            // If we know the school ID. Then we have what looks like an average of 300 classes less.
+            //string oldquery = "select CourseID, StartTimeID, EndTimeID, DayID, QuarterID, SectionID from CourseTime order by CourseID ASC;";
+            string query = "SELECT ct.CourseID, StartTimeID, EndTimeID, DayID, QuarterID, ct.SectionID, c.MaxCredit " +
+                "FROM CourseTime as ct " +
+                "LEFT JOIN Course as c ON c.CourseID = ct.CourseID " +
+                "ORDER BY ct.CourseID ASC";
             DataTable dt = DBPlugin.ExecuteToDT(query);
             int dt_size = dt.Rows.Count - 1;
             DataRow dr = dt.Rows[dt_size];
@@ -306,6 +337,7 @@ namespace Scheduler {
             int day = 0;
             int quarter = 0;
             int section = 0;
+            int credits = 0;
             int currentCourse = (int)dr.ItemArray[0];  //USED FOR PEAKING THE NEXT ROW
             int currentQuarter = (int)dr.ItemArray[4]; //USED FOR PEAKING THE NEXT ROW
             int currentSection = (int)dr.ItemArray[5]; //USED FOR PEAKING THE NEXT ROW
@@ -329,6 +361,7 @@ namespace Scheduler {
                 day = (int)dr.ItemArray[3];
                 quarter = (int)dr.ItemArray[4];
                 section = (int)dr.ItemArray[5];
+                credits = (int)dr.ItemArray[6];
 
                 //same course but different section OR different quarter is a different machine
                 //different course is a different machine 
@@ -355,7 +388,7 @@ namespace Scheduler {
                     ((int)dt.Rows[next].ItemArray[5] != currentSection)
                     || (int)dt.Rows[next].ItemArray[4] != currentQuarter)))
                 {
-                    addMachine(dummyMachine, course);
+                    addMachine(dummyMachine, new Job(course, credits, false));
                 }
                 dt_size--;
             }
@@ -368,9 +401,9 @@ namespace Scheduler {
         // amongst the machineNodes if the Course already exists there and acts 
         // accordingly.
         //------------------------------------------------------------------------------
-        void addMachine(Machine dummyMachine, int course)
+        void addMachine(Machine dummyMachine, Job job)
         {
-            dummyMachine.AddJob(new Job(course)); //adds job
+            dummyMachine.AddJob(job); //adds job
             for (int i = 0; i < machineNodes.Count; i++)
             {
                 MachineNode mn = machineNodes[i];
@@ -382,7 +415,7 @@ namespace Scheduler {
                         Machine m = machines[j];
                         if (m == dummyMachine)
                         { //found the machine, just add job
-                            m.AddJob(new Job(course));
+                            m.AddJob(job);
                             break;
                         }
                         else if (dummyMachine.GetYear().Equals(mn.GetYear()) && dummyMachine.GetQuarter().Equals(mn.GetQuarter()))
@@ -475,7 +508,9 @@ namespace Scheduler {
                 List<Job> jobsToBeScheduled = new List<Job>();
                 for (int j = 0; j < group.Count; j++)  //TRANSFER PREREQUSITE LIST INTO MORE JOBS
                 {
-                    Job myJob = new Job(group[j].PrerequisiteCourseID);
+
+                    // TODO: Store the credits in the JOB from the course network
+                    Job myJob = new Job(group[j].PrerequisiteCourseID, group[j].credits, false);
                     jobsToBeScheduled.Add(myJob);
                 }//now we have a list full of jobs to be scheduled
 
@@ -554,8 +589,13 @@ namespace Scheduler {
             for (int i = start; i < machineNodes.Count; i++)
             {
                 MachineNode mn = machineNodes[i];
-                //if machine node exeeds preferences continue to next node
-                if (mn.GetClassesScheduled() > 3) //<<---------------------------- TOTAL COURSES PER QUARTER PREFERENCE(?)
+                // Check the number of credits scheduled per quarter make sure it does not exceed preference.
+                // Check the number of core credits scheduled per quarter make sure it does not exceed preference.
+                // TODO:    Add a default case. What if they dont have a preference should we assign all their classes in one quarter?
+                //          Probably not...
+                //System.Diagnostics.Debug.WriteLine("NUM OF CREDITS FOR JOB: " + j.GetNumCredits() + " CORE COURSE: " + j.GetCoreCourse());
+                if (mn.GetCreditsScheduled() + j.GetNumCredits() > preferences.getCreditsPerQuarter() || 
+                    (j.GetCoreCourse() && j.GetNumCredits() + mn.GetMajorCreditsScheduled() > preferences.getCoreCredits())) 
                 {
                     continue;
                 }
@@ -576,7 +616,9 @@ namespace Scheduler {
                         j.SetScheduled(true);
                         j.SetQuarterScheduled(m.GetQuarter());
                         j.SetYearScheduled(m.GetYear());
-                        mn.AddClassesScheduled(1);
+                        // Need to update the machine node such that it reflects the new amount of credits, core credits, etc.
+                        //mn.AddClassesScheduled(1);
+                        mn.AddClassesScheduled(j);
                         finalPlan.Add(m);
                         return;
                     }
@@ -740,6 +782,8 @@ namespace Scheduler {
                         break;
                     }
                 }
+                if (largeDayIndex == -1)
+                    return false;
                 //compare that day
                 if ((smaller[k].GetStartTime() >= larger[largeDayIndex].GetStartTime() && smaller[k].GetStartTime() <= larger[largeDayIndex].GetEndTime()) ||
                 (smaller[k].GetEndTime() >= larger[largeDayIndex].GetStartTime() && smaller[k].GetEndTime() <= larger[largeDayIndex].GetEndTime()))
@@ -802,6 +846,7 @@ namespace Scheduler {
                 var groupCount = 1 + GetShortestGroup(groups[j].prereqs);
                 if (groupCount < shortest)
                 {
+                    //shortest = groupCount;
                     shortestGroup = j;
                 }
             }//so now we have the shortest list

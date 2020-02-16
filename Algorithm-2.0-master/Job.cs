@@ -25,8 +25,10 @@ namespace Scheduler {
         private int quarterScheduled;
         [JsonIgnore]
         private int yearScheduled;
-        //need to implement int credits for the course for preferences purposes
-        //need to implement boolean if its a major course or not for preferences purposes
+        [JsonIgnore]
+        private int credits;
+        [JsonIgnore]
+        private bool coreCourse;
         #endregion
 
         #region Constructor
@@ -40,6 +42,10 @@ namespace Scheduler {
             prerequisitesScheduled = false;
             quarterScheduled = 0;
             yearScheduled = 0;
+
+            // These are placeholder values...
+            credits = 0;
+            coreCourse = false;
         }
 
         public Job(int id) {
@@ -48,6 +54,20 @@ namespace Scheduler {
             quarterScheduled = -1;
             yearScheduled = -1;
             prerequisitesScheduled = false;
+
+            // These are placeholder values...
+            credits = 0;
+            coreCourse = false;
+        }
+
+        public Job(int id, int credits, bool coreClass) {
+            this.id = id;
+            scheduled = false;
+            quarterScheduled = -1;
+            yearScheduled = -1;
+            prerequisitesScheduled = false;
+            this.credits = credits;
+            coreCourse = coreClass;
         }
         #endregion
 
@@ -89,6 +109,21 @@ namespace Scheduler {
         {
             return id;
         }
+
+        //------------------------------------------------------------------------------
+        // getter for if this course is a major course; corresponds to what it is in DB
+        //------------------------------------------------------------------------------
+        public bool GetCoreCourse() {
+            return coreCourse;
+        }
+
+        //------------------------------------------------------------------------------
+        // getter for Number of credits; corresponds to what it is in DB
+        //------------------------------------------------------------------------------
+        public int GetNumCredits() {
+            return credits;
+        }
+            
         #endregion
 
         #region Setters
@@ -126,6 +161,22 @@ namespace Scheduler {
         public void SetYearScheduled(int x)
         {
             yearScheduled = x;
+        }
+
+        //------------------------------------------------------------------------------
+        // setter for if this course is a major course; corresponds to what it is in DB
+        //------------------------------------------------------------------------------
+        public void SetCoreCourse(bool val)
+        {
+            coreCourse = val;
+        }
+
+        //------------------------------------------------------------------------------
+        // setter for Number of credits; corresponds to what it is in DB
+        //------------------------------------------------------------------------------
+        public void SetNumCredits(int val)
+        {
+            credits = val;
         }
         #endregion
 

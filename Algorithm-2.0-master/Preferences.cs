@@ -107,6 +107,16 @@ namespace Scheduler {
         {
             return summerIntent;
         }
+
+        public int getCreditsPerQuarter() 
+        {
+            return prefs[0].getCreditsPerQuarter();
+        }
+
+        public int getCoreCredits()
+        {
+            return prefs[0].getCoreCourse();
+        }
         #endregion
 
         #region Data Interpretation and additional Deserialization
