@@ -4,7 +4,9 @@ using System.Data;
 using Newtonsoft.Json;
 
 namespace Scheduler {
-    public class Scheduler {
+    using Contracts;
+
+    public class Scheduler : IScheduler{
         #region NOTES
         /* This part of the algorithm, understandably, has a lot going on inside of it. THough functional, 
          * I believe that some improvements could be made. For example the SQL stuff region should probably 
