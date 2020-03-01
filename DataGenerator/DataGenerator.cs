@@ -24,7 +24,7 @@ namespace DataGenerator
         // This is commmented out to ignore this test. This test generates a lot of data
         // and should be ran sparingly as to not fill the database with a lot of redundant
         // test data.
-        //[TestMethod]
+        [TestMethod]
         public void GenerateData()
         {
             var insertedList = new List<int>();
@@ -32,6 +32,7 @@ namespace DataGenerator
             var courseObj = new CourseObject()
             {
                 school = "6",
+                courses = "5",
                 credits = "10",
                 major = "22",
                 quarters = "50",
@@ -40,9 +41,9 @@ namespace DataGenerator
                 summer = "N"
             };
             coursePrefList.Add(courseObj);
-            VaryEnrollment(courseObj, coursePrefList);
-            VaryJob(courseObj, coursePrefList);
-            VaryCredits(courseObj, coursePrefList);
+            // VaryEnrollment(courseObj, coursePrefList);
+            // VaryJob(courseObj, coursePrefList);
+            // VaryCredits(courseObj, coursePrefList);
             GeneratePlan(coursePrefList, insertedList);
             insertedList.Should().NotBeEmpty();
 

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace ApiCore
 {
     using Scheduler;
+    using Scheduler.Algorithms;
     using VaaApi;
 
     public static class Preferences
@@ -33,7 +34,7 @@ namespace ApiCore
 
         private static int SaveSchedule(int id, bool preferShortest)
         {
-            var scheduler = new JobShopScheduler(id, preferShortest);
+            var scheduler = new OpenShopScheduler(id, preferShortest);
             var schedule = scheduler.CreateSchedule(preferShortest);
             int insertedId = 0;
             var model = new ScheduleModel
