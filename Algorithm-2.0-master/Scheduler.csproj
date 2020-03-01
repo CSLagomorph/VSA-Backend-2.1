@@ -319,10 +319,11 @@
     <Compile Include="Job.cs" />
     <Compile Include="Machine.cs" />
     <Compile Include="MachineNode.cs" />
+    <Compile Include="Algorithms\OpenShopScheduler.cs" />
     <Compile Include="ParameterSet.cs" />
     <Compile Include="Preferences.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scheduler.cs" />
+    <Compile Include="Algorithms\JobShopScheduler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -348,6 +349,6 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\VaaApi\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\VaaApi\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props'))" />
     <Error Condition="!Exists('packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
-    </Target>
+  </Target>
   <Import Project="packages\Microsoft.AspNetCore.Mvc.Razor.Extensions.2.1.0\build\netstandard2.0\Microsoft.AspNetCore.Mvc.Razor.Extensions.targets" Condition="Exists('packages\Microsoft.AspNetCore.Mvc.Razor.Extensions.2.1.0\build\netstandard2.0\Microsoft.AspNetCore.Mvc.Razor.Extensions.targets')" />
 </Project>

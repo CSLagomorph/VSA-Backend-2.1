@@ -33,7 +33,7 @@ namespace ApiCore
 
         private static int SaveSchedule(int id, bool preferShortest)
         {
-            var scheduler = new Scheduler(id, preferShortest);
+            var scheduler = new JobShopScheduler(id, preferShortest);
             var schedule = scheduler.CreateSchedule(preferShortest);
             int insertedId = 0;
             var model = new ScheduleModel
