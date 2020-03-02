@@ -87,7 +87,7 @@
             this.quarters = quartersDeclared;
             years = quarters / 4;
             yearlength = MaxYearLength;
-            
+
         }
 
         //------------------------------------------------------------------------------ 
@@ -95,10 +95,10 @@
         //------------------------------------------------------------------------------
         private void InitNetwork()
         {
-           string rawpreqs = DBPlugin.ExecuteToString("SELECT p.CourseID, MaxCredit as credits, GroupID, PrerequisiteID, PrerequisiteCourseID " +
-                "FROM Prerequisite as p " +
-                "LEFT JOIN Course as c ON c.CourseID = p.CourseID " +
-                "FOR JSON PATH");
+            string rawpreqs = DBPlugin.ExecuteToString("SELECT p.CourseID, MaxCredit as credits, GroupID, PrerequisiteID, PrerequisiteCourseID " +
+                 "FROM Prerequisite as p " +
+                 "LEFT JOIN Course as c ON c.CourseID = p.CourseID " +
+                 "FOR JSON PATH");
             string rawcourses = DBPlugin.ExecuteToString("SELECT CourseID, MaxCredit as credits " +
                 "FROM Course " +
                 "FOR JSON PATH");
@@ -120,7 +120,7 @@
 
         }
 
-       
+
 
         //------------------------------------------------------------------------------
         // Creates machineNodes which are representative of the quarters given through 
@@ -137,7 +137,7 @@
                     Quarters.Add(m);
                 }
             }
-           
+
         }
 
         //------------------------------------------------------------------------------
@@ -173,34 +173,12 @@
 
         }
 
-        //------------------------------------------------------------------------------
-        // Queries the database for all the courses needed to complete a specific major
-        // at a specific school.
-        //
-        // PRIVATE METHOD: Major and School are indicated by Preferences. (table: ParameterSet)
-        // PUBLIC METHOD: Major and School are indicated by passed parameters
-        //------------------------------------------------------------------------------
-        public void InitDegreePlan(int majorID, int schoolID)
-        {
-            //string oldquery = "select CourseID from AdmissionRequiredCourses where MajorID ="
-            //                + majorID + " and SchoolID = " + schoolID + " order by CourseID ASC ";
-
-            string query = "SELECT arc.CourseID as CID, c.MaxCredit as Credits " +
-                           "FROM AdmissionRequiredCourses as arc " +
-                           "LEFT JOIN Course as c ON c.CourseID = arc.CourseID " +
-                           "WHERE MajorID = " + majorID + " and SchoolID = " + schoolID;
-
-            planBuilder(DBPlugin.ExecuteToDT(query));
-
-        }
-
-
         private void InitDegreePlan()
         {
-           string query = "SELECT arc.CourseID as CID, c.MaxCredit as Credits " +
-                "FROM AdmissionRequiredCourses as arc " +
-                "LEFT JOIN Course as c ON c.CourseID = arc.CourseID " +
-                "WHERE MajorID = " + StudentPreferences.getMajor() + " and SchoolID = " + StudentPreferences.getSchool();
+            string query = "SELECT arc.CourseID as CID, c.MaxCredit as Credits " +
+                 "FROM AdmissionRequiredCourses as arc " +
+                 "LEFT JOIN Course as c ON c.CourseID = arc.CourseID " +
+                 "WHERE MajorID = " + StudentPreferences.getMajor() + " and SchoolID = " + StudentPreferences.getSchool();
             planBuilder(DBPlugin.ExecuteToDT(query));
         }
 
@@ -375,144 +353,48 @@
 
         #region Scheduling Algorithm
         //------------------------------------------------------------------------------
-        // Creates a Schedule based on the required courses that need to be scheduled
-        // (given by the function, InitDegreePlan().
-        //
-        // SPECIAL NOTE: This is most likely the entry point for where we would need
-        //               to implement electives or optional courses should we need to
-        //               implement those. 
-        //
-        // Afterwards, this course returns the resulting schedule.
+        // Order in which the scheduler processes the jobs is not fixed in advance
+        // Of course, we have prerequisites so not everything can be scheduled at random
+        // so what we do is define the leaves (stuff we can parallelize) and try to find the best 
+        // path for those.
         //------------------------------------------------------------------------------
         public List<Machine> CreateSchedule(bool preferShortest)
         {
-            List<Job> majorCourses = RequiredCourses.GetList(0); //LIST OF REQUIRED COURSES
+            List<Job> majorCourses = RequiredCourses.GetList(0);
+            SortedDictionary<int, List<Job>> jobs = new SortedDictionary<int, List<Job>>();
             for (int i = 0; i < majorCourses.Count; i++)
             {
-                Job job = majorCourses[i]; //GET NEXT CLASS IN LIST
-                ScheduleCourse(job, preferShortest); //FUNCTION CALL TO SCHEDULE LIST
+                Job job = majorCourses[i];
+                AddPrerequisites(job, jobs, preferShortest, 0);
+                //ScheduleCourse(job, preferShortest); 
             }
+
+            ScheduleCourses(jobs);
             Schedule = GetBusyMachines(); //SUGGEST BETTER NAMING CONVENTION?//
             //return proposed schedule
             return Schedule;
         }
 
-        //------------------------------------------------------------------------------
-        // Uses recursive calls to schedule prerequisites of the passed job before 
-        // scheduling the job itself.
-        //
-        // If for some reason a course cannot be scheduled (due to scheduling conflicts)
-        // then that course is added a supplmentary list of unscheduled coursees.
-        //------------------------------------------------------------------------------
-        private void ScheduleCourse(Job job, bool preferShortest)
+        private void ScheduleCourses(SortedDictionary<int, List<Job>> jobs)
         {
-            #region ENDCASE
-            if (IsScheduled(job)) //CHECK IF CLASS IS SCHEDULED
+
+            foreach (var kvp in jobs)
             {
-                return; //IF SCHEDULED; FINISH
-            }
-            #endregion
-
-            #region RECURSIVE SCHEDULING CALL
-            int num = job.GetID(); //ID OF COURSE BEING SCHEDULED
-            List<CourseNode> groups = PrerequisiteNetwork.FindShortPath(num);//FINDS PREREQUISITE COURSES FOR THE GIVEN COURSE
-            if (PrereqsExist(groups) && !job.GetPrerequisitesScheduled())
-            {   //if j does not have prerequisites (OR its prerequisites have been scheduled) schedule j  
-                //schedule j's prerequisites by getting shortest group and whatnot
-                int selectedGroup;
-                if (preferShortest)
+                foreach (var job in kvp.Value)
                 {
-                    selectedGroup = GetShortestGroup(groups); //FIND GROUP WITH LEAST PREREQUISITES
+                    ScheduleCourse(job);
                 }
-                else
-                {
-                    selectedGroup = GetAnyGroup(groups); //Find any group is OK
-                }
-
-                List<CourseNode> group = groups[selectedGroup].prereqs; //GET LIST OF PREREQUISITES 
-
-                List<Job> jobsToBeScheduled = new List<Job>();
-                for (int j = 0; j < group.Count; j++)  //TRANSFER PREREQUSITE LIST INTO MORE JOBS
-                {
-
-                    // TODO: Store the credits in the JOB from the course network
-                    Job myJob = new Job(group[j].PrerequisiteCourseID, group[j].credits, false);
-                    jobsToBeScheduled.Add(myJob);
-                }//now we have a list full of jobs to be scheduled
-
-                for (int k = 0; k < jobsToBeScheduled.Count; k++) //SCHEDULE THE PREREQUISITES
-                { //schedule them all here
-                    ScheduleCourse(jobsToBeScheduled[k], preferShortest);
-                }//now they are scheduled
-                job.SetPrerequisitesScheduled(true);
             }
-            #endregion
-
-            #region SCHEDULE COURSE
-            PutCourseOnMachine(job, groups); //SCHEDULE COURSE
-            #endregion
-
-            #region Error Messages
-            if (!job.GetScheduled())
-            { //figure out what to do if it wasn't able to be scheduled, make this a function later
-                unableToSchedule.Add(job);
-            }
-            #endregion
         }
 
-        //------------------------------------------------------------------------------
-        // Puts a course into the schedule by first checking the course's most
-        // immediate prerequisite that has been scheduled and starting from the next
-        // nearest schedulable machineNode. From the starting point the course is then
-        // scheduled according to preferences.
-        // 
-        // SPECIAL NOTE: As Polina writes below, this is indeed a perfect function to
-        //               implement several preferences invloved with courses and scheduling.
-        //               Namely, Courses per quarter, day preferences, and timeOfDay preferences.
-        //               I took the liberty of labeling the best spots to place these.
-        //               Additionally, should Machines ever have a CoreCourse, or other attributes
-        //               (Diversity, Humanities, etc.) checks could be placed in this function
-        //               to schedule those courses.
-        // 
-        // does the actual action of putting a course on a machine; this will be the hub
-        // for implementing preferences, not all are implemented at the moment; also,
-        // right now unscheduled courses are simply going into a list but if you were to 
-        // do something else, this function is where it would originate
-        //------------------------------------------------------------------------------
-        private void PutCourseOnMachine(Job j, List<CourseNode> groups)
+        private void ScheduleCourse(Job j)
         {
-            #region variables
-            //get most recent prereq
-            int mostRecentPrereqYear = 0;
-            int mostRecentPrereqQuarter = 1;
-            int start = 0;
-            #endregion
-
-            #region Prerequisite Handler
-            //if no prereqs then schedule at any time
-            if (PrereqsExist(groups)) //CHECKS FOR NULL
-            { //this is if there are prereqs
-                int[] yq = GetMostRecentPrereq(groups);
-
-                mostRecentPrereqYear = yq[0];
-                mostRecentPrereqQuarter = yq[1];
-
-                //ERROR CHECK
-                if (mostRecentPrereqQuarter == -1 || mostRecentPrereqYear == -1)
-                { //has prerequisites but they weren't able to be scheduled
-                    unableToSchedule.Add(j);
-                    return;
-                }
-
-                //schedule 1 or more quarters after, mind the year <--(?)
-                //schedule on nearest available machine
-                //start i at whatever quarter you calculate, not simply zero
-                start = (mostRecentPrereqYear * 4 + mostRecentPrereqQuarter - 1) + 1;
+            if (IsScheduled(j))
+            {
+                return;
             }
-            #endregion
-
-
-            for (int i = start; i < Quarters.Count; i++)
+            //we're always being called in order, no need to check for prereqs
+            for (int i = 0; i < Quarters.Count; i++)
             {
                 MachineNode mn = Quarters[i];
                 // Check the number of credits scheduled per quarter make sure it does not exceed preference.
@@ -551,6 +433,50 @@
                 }
             }
         }
+
+        private void AddPrerequisites(Job job, SortedDictionary<int, List<Job>> jobs, bool preferShortest, int currentLevel)
+        {
+            var courseId = job.GetID();
+            List<CourseNode> groups = PrerequisiteNetwork.FindShortPath(courseId);
+            if (!PrereqsExist(groups))
+            {
+                if (!jobs.ContainsKey(currentLevel))
+                {
+                    jobs.Add(currentLevel, new List<Job>());
+                }
+                jobs[currentLevel].Add(job);
+            }
+            else
+            {
+                int nextLevel = currentLevel - 1;
+                int selectedGroup;
+                if (preferShortest)
+                {
+                    selectedGroup = GetShortestGroup(groups);
+                }
+                else
+                {
+                    selectedGroup = GetAnyGroup(groups);
+                }
+
+                List<CourseNode> group = groups[selectedGroup].prereqs;
+
+                for (int j = 0; j < group.Count; j++)
+                {
+
+                    Job myJob = new Job(group[j].PrerequisiteCourseID, group[j].credits, false);
+                    AddPrerequisites(myJob, jobs, preferShortest, nextLevel);
+                }
+                if (!jobs.ContainsKey(currentLevel))
+                {
+                    jobs.Add(currentLevel, new List<Job>());
+                }
+                //now finally, add the course
+                jobs[currentLevel].Add(job);
+            }
+        }
+
+
         #endregion
 
         #region Results
@@ -718,40 +644,6 @@
                 }
             }
             return false;
-        }
-
-        //------------------------------------------------------------------------------
-        // find by retrieving job and looking at when it was scheduled
-        // only called if the job actually has prerequisites
-        //------------------------------------------------------------------------------
-        private int[] GetMostRecentPrereq(List<CourseNode> groups)
-        {
-            int mostRecentPrereqYear = -1;
-            int mostRecentPrereqQuarter = -1;
-
-            for (int i = 1; i < groups.Count; i++)
-            {
-                for (int j = 0; j < Schedule.Count; j++)
-                {
-                    Machine m = Schedule[j];
-                    if (m.GetCurrentJobProcessing() == null || groups[i].prereqs[0] == null)
-                    {
-                        continue;
-                    }
-
-                    if (m.GetCurrentJobProcessing().GetID() == groups[i].prereqs[0].PrerequisiteCourseID)
-                    { //found the course
-                        if (m.GetCurrentJobProcessing().GetYearScheduled() > mostRecentPrereqYear ||
-                           (m.GetCurrentJobProcessing().GetYearScheduled() == mostRecentPrereqYear
-                            && m.GetCurrentJobProcessing().GetQuarterScheduled() > mostRecentPrereqQuarter))
-                        { //now check if it is more recent
-                            mostRecentPrereqYear = m.GetCurrentJobProcessing().GetYearScheduled();
-                            mostRecentPrereqQuarter = m.GetCurrentJobProcessing().GetQuarterScheduled();
-                        }
-                    }
-                }
-            }
-            return new int[] { mostRecentPrereqYear, mostRecentPrereqQuarter };
         }
 
         //------------------------------------------------------------------------------
