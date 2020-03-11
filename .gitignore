@@ -415,3 +415,6 @@ __pycache__/
 !src/ReportingPipelineWorker/MessageReceivers/TopicSubscribers/TestResults/
 QTestLogs
 /Algorithm-2.0-master/bin/Debug/*
+
+#Db Connection String
+/CourseNetworkAPI/DBConnectionString.json
