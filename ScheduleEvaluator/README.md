@@ -6,7 +6,7 @@ The purpose of this document is to provide an explanation behind the design, imp
 
 To help accommodate the changing weight on preferences, types of preferences, and number of preferences, this algorithm is designed with a large emphasis on modularity.
 
-![Design](SchedulerEvluator V.1.png)
+![](SchedulerEvluator-V.1.png)
 
 ### Evaluator.cs 
 
