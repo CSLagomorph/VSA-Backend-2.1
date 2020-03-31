@@ -6,6 +6,8 @@ The purpose of this document is to provide an explanation behind the design, imp
 
 To help accommodate the changing weight on preferences, types of preferences, and number of preferences, this algorithm is designed with a large emphasis on modularity.
 
+![Design](C:\Users\cj\source\repos\VSA-Backend-2.1\ScheduleEvaluator\SchedulerEvluator V.1.png)
+
 ### Evaluator.cs 
 
 This object controls the main flow of the algorithm. This class has two class constants. These dictate how the schedules are evaluated and how each criteria is weighted.  The first is an array of type `CritTyp` this type is explained [here](#CritTyp.cs) and the second type is an array of doubles. This second array contains the weights corresponding to each Criteria in the `CritTyp` array. ___The doubles in the array must sum to 1___ 
@@ -42,9 +44,25 @@ To help with readability and minimize the manual mapping of numbers to Criteria 
 
 
 
-__From here add a picture of the design and add a header for each type of Sub-Criteria class you make__
+## Criteria
 
+The following section outlines all of the Concrete implementations of the abstract class Criteria. The section does not go into technical detail, but instead give a short overview of what each criteria is evaluating on. 
 
+_(All of the criteria outlined below has been derived from the Weak Labeling Criteria proposed by Rigdha Acharya, Will Thomas, and CJ Hillbrand, approved by Dr. Parsons.)_
+
+| Criteria            | Explanation                                                  |
+| ------------------- | :----------------------------------------------------------- |
+| AllPrereqs          | Validates that all prerequisites are satisfied for each course. |
+| CoreClassesLastYear | Validates that the number of core classes scheduled for the last quarter is at or below the student preference. |
+| CoreCreditsAQuarter | Validates that the number of core credits taken each quarter are at or below the student preference. |
+| ElectiveRelevancy   | Validates that the electives taken are relevant to major course work? |
+| EnglishTimes        | Validates that any English courses are scheduled before or on a specific quarter. |
+| MajorSpecificBreaks | Validates that there are no core classes that have breaks between them |
+| MathBreaks          | Validates that there are no breaks in any math sequence      |
+| MaxQuarters         | Validates that the number of quarters scheduled do not exceed the preferred number of quarters scheduled. |
+| PreprequisiteOrder  | Validates that no course is scheduled before all of the prerequisites are satisfied. |
+| TimeOfDay           | Validates that all courses are scheduled at the preferred time of day. |
 
 __Add header for Schedule.cs__
 
+__Need to create a new section about the Controller for the API Layer__

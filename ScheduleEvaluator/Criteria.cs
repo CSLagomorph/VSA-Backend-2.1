@@ -2,10 +2,17 @@
 using System.Collections.Generic;
 using System.Text;
 
+// Parent class of all of the Criteria classes in the 
+// ConcreteCriterias folder. 
+
 namespace ScheduleEvaluator
 {
-    interface Criteria
+    abstract class Criteria
     {
-        public double getResult(Schedule s);
+        private readonly double weight;
+        public Criteria(double weight) {
+            this.weight = weight;
+        }
+        abstract public double getResult(Schedule s);
     }
 }
