@@ -40,7 +40,7 @@ namespace ScheduleEvaluator
         // The bread and butter of the class. At first this method doesn't look like much, but
         // by iterating over all of the criterias and having them evaluate the scheudle on their own
         // criteria this function is able to assign a score to the schedule.
-        public double evalaute(Schedule s) {
+        public double evalaute(ScheduleModel s) {
             double result = 0;
             foreach (Criteria c in criterias) 
                 result += c.getResult(s);

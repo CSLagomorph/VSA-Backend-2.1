@@ -11,7 +11,7 @@ namespace ScheduleEvaluator.ConcreteCriterias
             throw new NotImplementedException();
         }
 
-        public override double getResult(Schedule s)
+        public override double getResult(ScheduleModel s)
         {
             throw new NotImplementedException();
         }

@@ -13,6 +13,6 @@ namespace ScheduleEvaluator
         public Criteria(double weight) {
             this.weight = weight;
         }
-        abstract public double getResult(Schedule s);
+        abstract public double getResult(ScheduleModel s);
     }
 }
