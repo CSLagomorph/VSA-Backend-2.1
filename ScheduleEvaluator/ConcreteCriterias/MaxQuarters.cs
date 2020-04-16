@@ -8,12 +8,16 @@ namespace ScheduleEvaluator.ConcreteCriterias
     {
         public MaxQuarters(double weight) : base(weight)
         {
-            throw new NotImplementedException();
+
         }
 
-        public override double getResult(ScheduleModel s)
+        // Validates that the number of quarters scheduled do not exceed 
+        // the preferred number of quarters scheduled.
+        // Returns the difference between preferred number of quarters and
+        // scheduled number of quarters. 
+        public override double getResult(ScheduleModel s, Preferences p)
         {
-            throw new NotImplementedException();
+            return Math.Abs(s.Quarters.size() - p.getMaxQuarters());
         }
     }
 }
