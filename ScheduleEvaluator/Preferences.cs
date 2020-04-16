@@ -7,31 +7,25 @@
  * strength of a ScheduleModel with respect to the student's preferences.
  */
 
+using System;
+
 namespace ScheduleEvaluator
 {
-    class Preferences
+    public class Preferences
     {
 
         // Fields correspond to preference-related 'ConcreteCriterias'
-        private int maxQuarters;
-
-        public Preferences(int maxQtr)
-        {
-            maxQuarters = maxQtr;
-        }
-
-        // Get and Set for MaxQuarters criterion
-        public int getMaxQuarters()
-        {
-            return maxQuarters;
-        }
-        public void set(int max)
-        {
-            if (max < 0)
-            {
-                throw new ArgumentException();
+        public int MajorID { get; set; }
+        public int MaxQuarters {
+            get {
+                return MaxQuarters;
             }
-            maxQuarters = max;
+            set {
+                if (value < 0)
+                    throw new ArgumentException("Max Quarters Must be Greater than 0");
+                MaxQuarters = value;
+            } 
         }
+       
     }
 }

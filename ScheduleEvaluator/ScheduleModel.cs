@@ -43,6 +43,8 @@ namespace ScheduleEvaluator
 
         [JsonProperty("quarters")]
         public List<Quarter> Quarters { get; set; }
+        [JsonIgnore]
+        public Preferences PreferenceSet { get; set; }
     }
 
     public partial class Metadata
@@ -76,6 +78,8 @@ namespace ScheduleEvaluator
 
         [JsonProperty("description")]
         public string Description { get; set; }
+        [JsonProperty("departmentID")]
+        public int DepartmentID { get; set; }
     }
 
     internal static class Converter
