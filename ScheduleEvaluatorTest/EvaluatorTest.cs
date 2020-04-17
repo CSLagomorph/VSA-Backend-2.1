@@ -70,9 +70,9 @@ namespace ScheduleEvaluatorTest
             Preferences result;
             string query = "SELECT MajorID as MID, NumberCoreCoursesPerQuarter as CPQ, MaxNumberofQuarters as MNQ, " +
                 "CreditsPerQuarter as CreditsPQ, SummerPreference as SP, PreferredMathStart as PMS, " +
-                "PreferredEnglishStart as PES, Quarter as Q, TimePeriod as T " +
-                "FROM ParameterSet as ps JOIN Quarter as q on ps.QuarterPreferenceID = q.QuarterID " +
-                "JOIN TimePreference as tp on tp.TimePreferenceID = ps.TimePreferenceID " +
+                "PreferredEnglishStart as PES, QuarterPreferenceID as Q, TimePreferenceID as T, DepartmentID as DID " +
+                "FROM ParameterSet as ps " +
+                "JOIN Major as m on m.MajorID = sp.MajorID" +
                 $"WHERE ps.parameterSetID = {preferenceSetID}";
             DataTable table = conn.ExecuteToDT(query);
             
@@ -93,11 +93,12 @@ namespace ScheduleEvaluatorTest
                 // This and the Prefererred Math start, have no idea what
                 // type they are of
                 PreferredEnglishStart = (int)row["PES"],
-                QuarterPreference = (string)row["Q"],
-                TimePreference = (string)row["T"],
+                QuarterPreference = (int)row["Q"],
+                TimePreference = (int)row["T"],
                 CreditsPerQuarter = (int)row["CreditsPQ"],
                 SummerPreference = ((string)row["SP"]).Equals("Yes"),
-                PreferredMathStart = (int)row["PMS"]
+                PreferredMathStart = (int)row["PMS"],
+                DepartmentID = (int)row["DID"]
 
             };
 

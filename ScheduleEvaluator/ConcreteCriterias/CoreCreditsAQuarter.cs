@@ -21,15 +21,17 @@ namespace ScheduleEvaluator.ConcreteCriterias
                     // which department the major is in. IF the department for
                     // the major is the same as the department for the class is 
                     // the same... Then we will assume that this is a core credit.
-                    if (c.DepartmentID == 1) { //replace 1 with assumed major from preferences object
+                    if (c.DepartmentID == s.PreferenceSet.DepartmentID) { 
                         coreCredits++;
                     }
                 }
-                if (coreCredits > 1) { // replace with student preference here. 
+                if (coreCredits > s.PreferenceSet.CoreCoursesPerQuarter) { 
                     numQuartersOver++;
                 }
             }
+            // May we want to change this binary return.
             return numQuartersOver > 0 ? 0.0 : 1.0;
         }
     }
 }
+ 

@@ -16,6 +16,15 @@ namespace ScheduleEvaluator
 
         // Fields correspond to preference-related 'ConcreteCriterias'
         public int MajorID { get; set; }
+        public int CoreCoursesPerQuarter { get; set; }
+        public int PreferredEnglishStart { get; set; }
+        public int QuarterPreference { get; set; }
+        public int TimePreference { get; set; }
+        public int CreditsPerQuarter { get; set; }
+        public Boolean SummerPreference { get; set; }
+        public int PreferredMathStart { get; set; }
+        public int DepartmentID { get; set; }
+        public int CoreCountLastYear { get; set; }
         public int MaxQuarters {
             get {
                 return MaxQuarters;

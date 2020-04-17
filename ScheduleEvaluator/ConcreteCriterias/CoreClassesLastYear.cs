@@ -13,7 +13,23 @@ namespace ScheduleEvaluator.ConcreteCriterias
 
         public override double getResult(ScheduleModel s)
         {
-            throw new NotImplementedException();
+            long lastYear = -1;
+            foreach (Quarter q in s.Quarters) {
+                if (q.Year > lastYear) {
+                    lastYear = q.Year;
+                }
+            }
+            double sum = 0;
+            foreach (Quarter q in s.Quarters) {
+                if (q.Year == lastYear) {
+                    foreach (Course c in q.Courses) {
+                        if (c.DepartmentID == s.PreferenceSet.DepartmentID) {
+                            sum++;
+                        }
+                    }
+                }
+            }
+            return sum;
         }
     }
 }
