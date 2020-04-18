@@ -297,7 +297,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Algorithms\LongestPathScheduler.cs" />
     <Compile Include="Contracts\IScheduler.cs" />
+    <Compile Include="Contracts\Schedule.cs" />
     <Compile Include="CourseNetwork.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
@@ -311,8 +313,8 @@
     <Compile Include="MachineNode.cs" />
     <Compile Include="ParameterSet.cs" />
     <Compile Include="Preferences.cs" />
-	<Compile Include="Algorithms\JobShopScheduler.cs" />
-	<Compile Include="Algorithms\OpenShopScheduler.cs" />
+    <Compile Include="Algorithms\JobShopScheduler.cs" />
+    <Compile Include="Algorithms\OpenShopScheduler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -336,6 +338,6 @@
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>   
-    </Target>
+    </PropertyGroup>
+  </Target>
 </Project>

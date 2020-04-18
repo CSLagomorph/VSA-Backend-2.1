@@ -41,9 +41,9 @@ namespace DataGenerator
                 summer = "N"
             };
             coursePrefList.Add(courseObj);
-            // VaryEnrollment(courseObj, coursePrefList);
-            // VaryJob(courseObj, coursePrefList);
-            // VaryCredits(courseObj, coursePrefList);
+            VaryEnrollment(courseObj, coursePrefList);
+            VaryJob(courseObj, coursePrefList);
+            VaryCredits(courseObj, coursePrefList);
             GeneratePlan(coursePrefList, insertedList);
             insertedList.Should().NotBeEmpty();
 
@@ -192,13 +192,9 @@ namespace DataGenerator
         {
             foreach (var courseObject in courseObj)
             {
-
                 var insertedId = Preferences.ProcessPreference(courseObject, true);
                 insertedId.Should().NotBe(0);
                 insertedList.Add(insertedId);
-
-
-
             }
         }
     }

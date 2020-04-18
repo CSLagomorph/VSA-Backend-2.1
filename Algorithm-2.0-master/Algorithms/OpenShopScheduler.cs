@@ -358,7 +358,7 @@
         // so what we do is define the leaves (stuff we can parallelize) and try to find the best 
         // path for those.
         //------------------------------------------------------------------------------
-        public List<Machine> CreateSchedule(bool preferShortest)
+        public Schedule CreateSchedule(bool preferShortest)
         {
             List<Job> majorCourses = RequiredCourses.GetList(0);
             SortedDictionary<int, List<Job>> jobs = new SortedDictionary<int, List<Job>>();
@@ -371,8 +371,12 @@
 
             ScheduleCourses(jobs);
             Schedule = GetBusyMachines(); //SUGGEST BETTER NAMING CONVENTION?//
-            //return proposed schedule
-            return Schedule;
+                                          //return proposed schedule
+            return new Schedule()
+            {
+                Courses = this.Schedule,
+                SchedulerName = nameof(OpenShopScheduler)
+            };
         }
 
         private void ScheduleCourses(SortedDictionary<int, List<Job>> jobs)

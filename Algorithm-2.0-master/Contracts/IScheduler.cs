@@ -8,6 +8,6 @@ namespace Scheduler.Contracts
 {
     interface IScheduler
     {
-        List<Machine> CreateSchedule(bool preferShortest);
+        Schedule CreateSchedule(bool preferShortest);
     } 
 }
