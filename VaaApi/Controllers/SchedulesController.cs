@@ -12,6 +12,7 @@ namespace VaaApi.Controllers
     using System.Data;
     using System.Web.Http.Cors;
     using System.Web.Http.Results;
+    using Models;
     using Newtonsoft.Json;
 
     public class SchedulesController : ApiController

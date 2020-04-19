@@ -4,6 +4,8 @@ using System.Text;
 
 namespace ScheduleEvaluator.ConcreteCriterias
 {
+    using Models;
+
     class MathBreaks : Criteria
     {
         public MathBreaks(double weight) : base(weight)

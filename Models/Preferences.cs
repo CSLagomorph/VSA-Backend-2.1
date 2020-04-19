@@ -7,10 +7,10 @@
  * strength of a ScheduleModel with respect to the student's preferences.
  */
 
-using System;
-
-namespace ScheduleEvaluator
+namespace Models
 {
+    using System;
+
     public class Preferences
     {
 
@@ -25,16 +25,19 @@ namespace ScheduleEvaluator
         public int PreferredMathStart { get; set; }
         public int DepartmentID { get; set; }
         public int CoreCountLastYear { get; set; }
-        public int MaxQuarters {
-            get {
-                return MaxQuarters;
+        public int MaxQuarters
+        {
+            get
+            {
+                return this.MaxQuarters;
             }
-            set {
+            set
+            {
                 if (value < 0)
                     throw new ArgumentException("Max Quarters Must be Greater than 0");
-                MaxQuarters = value;
-            } 
+                this.MaxQuarters = value;
+            }
         }
-       
+
     }
 }

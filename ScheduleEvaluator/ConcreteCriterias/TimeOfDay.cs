@@ -4,6 +4,8 @@ using System.Text;
 
 namespace ScheduleEvaluator.ConcreteCriterias
 {
+    using Models;
+
     class TimeOfDay : Criteria
     {
         public TimeOfDay(double weight) : base(weight)

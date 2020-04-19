@@ -4,6 +4,8 @@ using System.Text;
 
 namespace ScheduleEvaluator.ConcreteCriterias
 {
+    using Models;
+
     class AllPrereqs : Criteria
     {
         public AllPrereqs(double weight) : base(weight) {

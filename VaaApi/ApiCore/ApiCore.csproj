@@ -39,7 +39,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <ItemGroup>   
+  <ItemGroup>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.1.0.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
@@ -288,12 +288,15 @@
     <Compile Include="CourseObject.cs" />
     <Compile Include="Preferences.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ScheduleModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Algorithm-2.0-master\Scheduler.csproj">
       <Project>{8c48265c-a39c-49c4-8acd-71b6eb5f7980}</Project>
       <Name>Scheduler</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Models\Models.csproj">
+      <Project>{99f2b340-c755-407f-bffa-d3ca1ec56137}</Project>
+      <Name>Models</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -305,5 +308,5 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-     </Target>
+  </Target>
 </Project>

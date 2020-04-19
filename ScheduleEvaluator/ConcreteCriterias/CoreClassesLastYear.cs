@@ -4,6 +4,8 @@ using System.Text;
 
 namespace ScheduleEvaluator.ConcreteCriterias
 {
+    using Models;
+
     class CoreClassesLastYear : Criteria
     {
         public CoreClassesLastYear(double weight) : base(weight)

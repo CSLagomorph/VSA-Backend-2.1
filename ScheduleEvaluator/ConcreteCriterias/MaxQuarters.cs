@@ -4,6 +4,8 @@ using System.Text;
 
 namespace ScheduleEvaluator.ConcreteCriterias
 {
+    using Models;
+
     class MaxQuarters : Criteria
     {
         public MaxQuarters(double weight) : base(weight)

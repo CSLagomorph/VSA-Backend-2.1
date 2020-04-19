@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace ApiCore
 {
+    using Models;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Scheduler;
     using Scheduler.Algorithms;
-    using VaaApi;
 
     public static class Preferences
     {
@@ -36,7 +36,7 @@ namespace ApiCore
 
         private static int SaveSchedule(int id, bool preferShortest)
         {
-            var scheduler = new LongestPathScheduler(id, preferShortest);
+            var scheduler = new OpenShopGAScheduler(id, preferShortest);
             var schedule = scheduler.CreateSchedule(preferShortest);
             int insertedId = 0;
             var model = new ScheduleModel
