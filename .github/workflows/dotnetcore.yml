@@ -1,0 +1,26 @@
+name: Build VSA-Bacend-2.1
+
+on:
+  [push]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      name: Checkout Code
+      
+    - name: setup-msbuild
+      uses: microsoft/setup-msbuild@v1
+      
+    - name: Setup NuGet.exe for use with actions
+      uses: NuGet/setup-nuget@v1.0.2
+    
+    - name: Restore NuGet packages
+      run: nuget restore VaaApi/VaaApi.sln
+    
+    - name: Build
+      run: msbuild VaaApi/VaaApi.sln
+      
