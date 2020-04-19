@@ -9,7 +9,7 @@ using System.Text;
 
 namespace ScheduleEvaluator
 {
-    class Evaluator
+    public class Evaluator
     {
         // These fields are hardcoded before program runtime. They define the preferences and the weights associated with
         // each preference. For now these two structures are going to stay as fields, but in the future they may migrate to passed

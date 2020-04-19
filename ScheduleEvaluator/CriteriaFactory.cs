@@ -17,12 +17,14 @@ namespace ScheduleEvaluator
             if (types.Length == 0 || types.Length == 0)
                 throw new ArgumentException("Criteria Types and Weights must have elements");
 
-            double sum = 0;
-            foreach (double val in weights)
-                sum += val;
+            // This is preliminary weight validation. This should be implemented lated to follow the actual rules that
+            // we want.
+            //double sum = 0;
+            //foreach (double val in weights)
+            //    sum += val;
 
-            if (sum != 1.0)
-                throw new ArgumentException("Weights must sum to 1.0");
+            //if (sum != 1.0)
+            //    throw new ArgumentException("Weights must sum to 1.0");
 
             Criterias = new Criteria[types.Length];
 

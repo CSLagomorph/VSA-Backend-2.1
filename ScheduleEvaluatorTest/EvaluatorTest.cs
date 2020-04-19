@@ -22,14 +22,25 @@ namespace ScheduleEvaluatorTest
         [TestMethod]
         public void ExampleTest() {
             // Construct a few Schedule Models
-            // Construct a preference set.
+            ScheduleModel sm = getScheduleFromDB(12); // Replace the int here with the actual schedule ID
+            Evaluator eval = new Evaluator();
 
-            // Evaluate against ONE criteria and make sure
-            // Everything checks out
+            // Construct a preference set.
+            Preferences pref = GetPreferencesFromDB(10); // Replace the int here with an actual preference set ID
+
+            // Associate the schedule with a given preference set:
+            sm.PreferenceSet = pref;
+
+            // Get the score for the schedule associated with the preference set. NOTE: The preference set does not
+            // dictate the criteria the schedule is evaluated against. To change which criterias to evaluate against 
+            // change the array of CritTyp and Weights in `Evaluator.cs`
+            double result = eval.evalaute(sm);
 
             // Include an Assert to signify the test passsing/failing.
             Assert.AreEqual(1, 1);
         }
+
+        // These DB methods ARE NOT TESTED.
         private ScheduleModel getScheduleFromDB(int generatedPlanID) {
             ScheduleModel result = new ScheduleModel
             {
@@ -81,8 +92,7 @@ namespace ScheduleEvaluatorTest
             if (table.Rows.Count != 1)
                 throw ArgumentException("PreferenceSetID returned more than one Preference Set");
 
-            // FIXME: This is guaranteed to iterate once, but how to access just
-            // first row with iteration?
+
             DataRow row = table.Rows[0];
             
             result = new Preferences()
