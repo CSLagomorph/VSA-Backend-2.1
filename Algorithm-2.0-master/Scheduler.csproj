@@ -298,6 +298,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithms\LongestPathScheduler.cs" />
+    <Compile Include="Algorithms\OpenShopGAScheduler.cs" />
     <Compile Include="Algorithms\SchedulerBase.cs" />
     <Compile Include="Contracts\IScheduler.cs" />
     <Compile Include="Contracts\Schedule.cs" />
@@ -317,6 +318,7 @@
     <Compile Include="Algorithms\JobShopScheduler.cs" />
     <Compile Include="Algorithms\OpenShopScheduler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SchedulerExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
