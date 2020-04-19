@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace ApiCore
 {
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using Scheduler;
     using Scheduler.Algorithms;
     using VaaApi;
@@ -34,7 +36,7 @@ namespace ApiCore
 
         private static int SaveSchedule(int id, bool preferShortest)
         {
-            var scheduler = new OpenShopScheduler(id, preferShortest);
+            var scheduler = new LongestPathScheduler(id, preferShortest);
             var schedule = scheduler.CreateSchedule(preferShortest);
             int insertedId = 0;
             var model = new ScheduleModel
@@ -44,9 +46,10 @@ namespace ApiCore
             var DBPlugin = new DBConnection();
             try
             {
+                var schedulerSettings = JsonConvert.SerializeObject(schedule.ScheduleSettings);
                 DBPlugin.ExecuteToString(
-                    $"insert into GeneratedPlan (Name, ParameterSetID, DateAdded, LastDateModified, Status) " +
-                    $"Values ('latest', {id}, '{DateTime.UtcNow}', '{DateTime.UtcNow}', {1})");
+                    $"insert into GeneratedPlan (Name, ParameterSetID, DateAdded, LastDateModified, Status, SchedulerName, SchedulerSettings) " +
+                    $"Values ('latest', {id}, '{DateTime.UtcNow}', '{DateTime.UtcNow}', {1}, '{schedule.SchedulerName}', '{schedulerSettings}')");
                 var idString = DBPlugin.ExecuteToString("SELECT IDENT_CURRENT('GeneratedPlan')");
                 insertedId = Convert.ToInt32(idString);
                 model.Id = insertedId;
@@ -58,7 +61,7 @@ namespace ApiCore
                 throw;
             }
 
-            var byYear = schedule.GroupBy(s => s.GetYear());
+            var byYear = schedule.Courses.GroupBy(s => s.GetYear());
             foreach (var kvp in byYear)
             {
                 var byQuarter = kvp.GroupBy(s => s.GetQuarter());
