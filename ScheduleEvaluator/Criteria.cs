@@ -7,6 +7,8 @@ using System.Text;
 
 namespace ScheduleEvaluator
 {
+    using Models;
+
     abstract class Criteria
     {
         private readonly double weight;

@@ -6,7 +6,11 @@
 //
 //    var welcome = ScheduleModel.FromJson(jsonString);
 
-namespace VaaApi
+// This class was copied from the VaaApi coreapi created by Rigdha.
+// Feel free to alter the fields of this class to better store important information that
+// we need.
+
+namespace Models
 {
     using System;
     using System.Collections.Generic;
@@ -39,6 +43,8 @@ namespace VaaApi
 
         [JsonProperty("quarters")]
         public List<Quarter> Quarters { get; set; }
+        [JsonIgnore]
+        public Preferences PreferenceSet { get; set; }
     }
 
     public partial class Metadata
@@ -72,6 +78,8 @@ namespace VaaApi
 
         [JsonProperty("description")]
         public string Description { get; set; }
+        [JsonProperty("departmentID")]
+        public int DepartmentID { get; set; }
     }
 
     internal static class Converter

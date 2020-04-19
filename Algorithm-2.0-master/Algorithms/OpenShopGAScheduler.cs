@@ -13,6 +13,7 @@
     /// </summary>
     public class OpenShopGAScheduler : SchedulerBase, IScheduler
     {
+        private OpenShopGASchedulerSettings CurrentBestFit = null;
         #region Constructor
         //------------------------------------------------------------------------------
         // 
@@ -20,12 +21,12 @@
         // 
         //------------------------------------------------------------------------------
 
-        public OpenShopGAScheduler(int paramID, bool preferShortest = true)
+        public OpenShopGAScheduler(int paramID, bool preferShortest = true, OpenShopGASchedulerSettings currentBestFit = null)
         {
+            this.CurrentBestFit = currentBestFit;
             SetUp(paramID);
             MakeStartingPoint();
             InitDegreePlan();
-            CreateSchedule(preferShortest);
         }
         #endregion
 
@@ -46,10 +47,10 @@
                 AddPrerequisites(job, jobs, preferShortest, 0);
             }
 
-            return FindBestSchedule(jobs, 3);
+            return FindBestSchedule(jobs, 30, 200, 60, this.CurrentBestFit);
         }
 
-        public Schedule FindBestSchedule(SortedDictionary<int, List<Job>> jobs, int level=20, int populationSize=100)
+        public Schedule FindBestSchedule(SortedDictionary<int, List<Job>> jobs, int level = 20, int populationSize = 100, int topPercentToKeep = 80, OpenShopGASchedulerSettings currentBestFit = null)
         {
             //first, define a population
             var populationSet = new List<Schedule>();
@@ -68,41 +69,65 @@
                 populationSet.Add(sched);
             }
 
-            var fittest= SelectFittest(populationSet, level);
+            var fittest = SelectFittest(populationSet, level, topPercentToKeep, currentBestFit);
             return fittest.OrderByDescending(s => s.Rating).First();
         }
 
-        public List<Schedule> SelectFittest(List<Schedule> populationSet,int level = 20)
+        public List<Schedule> SelectFittest(List<Schedule> populationSet, int level = 20, int topPercentToKeep = 95, OpenShopGASchedulerSettings currentBestFit = null)
         {
-            if (level == 0)
+            if (level == 0 || populationSet.Count <= 2)
             {
                 return populationSet;
             }
             var rand = new Random();
+            Schedule topSchedule = null;
             //select best from population
-            var topSchedules = populationSet.OrderByDescending(s => s.Rating).First();
-
-            populationSet.Remove(topSchedules);
-            List<Schedule> offSprings = new List<Schedule>();
-            while (populationSet.Count >0)
+            if (currentBestFit == null)
             {
-                var mate = populationSet.First();
-                //cross over
-                var crossOver = GetCrossOver(topSchedules.ScheduleSettings, mate.ScheduleSettings);
-                //mutate (swap with some other schedule in the population)
-                var randomPop = rand.Next(populationSet.Count - 1);
-                var randomToMutate = populationSet[randomPop];
-                var mutation = GetCrossOver(crossOver, randomToMutate.ScheduleSettings);
-
-                ScheduleCourse(mutation.Chromosome);
-                var offspring = new Schedule()
+                topSchedule = populationSet.OrderByDescending(s => s.Rating).First();
+            }
+            else
+            {
+                ScheduleCourse(currentBestFit.Chromosome);
+                topSchedule = new Schedule()
                 {
                     Courses = this.Schedule,
                     SchedulerName = nameof(OpenShopGAScheduler),
-                    ScheduleSettings = crossOver,
+                    ScheduleSettings = currentBestFit,
                     Rating = rand.Next(5)
                 };
-                offSprings.Add(offspring);
+            }
+
+            var cutoff = populationSet.Count * topPercentToKeep / 100;
+            populationSet = populationSet.OrderByDescending(s => s.Rating).Take(cutoff).ToList();
+            if (populationSet.Contains(topSchedule))
+            {
+                populationSet.Remove(topSchedule);
+            }
+            List<Schedule> offSprings = new List<Schedule>();
+            while (populationSet.Count > 0)
+            {
+                var mate = populationSet.First();
+                //cross over
+                var crossOvers = GetCrossOvers(topSchedule.ScheduleSettings, mate.ScheduleSettings, 2);
+                foreach (var crossOver in crossOvers)
+                {
+                    //mutate (swap with some other schedule in the population)
+                    var randomPop = rand.Next(populationSet.Count - 1);
+                    var randomToMutate = populationSet[randomPop];
+                    var mutation = GetCrossOvers(crossOver, randomToMutate.ScheduleSettings, 1);
+
+                    ScheduleCourse(mutation.First().Chromosome);
+                    var offspring = new Schedule()
+                    {
+                        Courses = this.Schedule,
+                        SchedulerName = nameof(OpenShopGAScheduler),
+                        ScheduleSettings = crossOver,
+                        Rating = rand.Next(5)
+                    };
+                    offSprings.Add(offspring);
+                }
+
                 populationSet.Remove(mate);
 
             }
@@ -110,32 +135,46 @@
             return SelectFittest(offSprings, level - 1);
         }
 
-        private OpenShopGASchedulerSettings GetCrossOver(OpenShopGASchedulerSettings parent1, OpenShopGASchedulerSettings parent2)
+        private List<OpenShopGASchedulerSettings> GetCrossOvers(OpenShopGASchedulerSettings parent1, OpenShopGASchedulerSettings parent2, int count)
         {
             var random = new Random();
             var lowest = parent1.Chromosome.Count < parent2.Chromosome.Count ? parent1.Chromosome.Count : parent2.Chromosome.Count;
-            var randIndex = random.Next(lowest - 1);
-
-            //swap at this index
-            var old = parent1.Chromosome[randIndex];
-            var newVal = parent2.Chromosome[randIndex];
-
-            parent1.Chromosome[randIndex] = newVal;
-            int jobToReplace = -1;
-            for (int i = 0; i < parent1.Chromosome.Count; i++)
+            var crossOvers = new List<OpenShopGASchedulerSettings>();
+            for (int i = 0; i < count; i++)
             {
-                if (parent1.Chromosome[i] == newVal)
+                var crossOver = new OpenShopGASchedulerSettings()
                 {
-                    jobToReplace = i;
+                    Chromosome = new List<Job>()
+                };
+                foreach (var job in parent1.Chromosome)
+                {
+                    crossOver.Chromosome.Add(job);
                 }
+                var randIndex = random.Next(lowest - 1);
+
+                //swap at this index
+                var old = crossOver.Chromosome[randIndex];
+                var newVal = crossOver.Chromosome[randIndex];
+
+                crossOver.Chromosome[randIndex] = newVal;
+                int jobToReplace = -1;
+                for (int j = 0; i < parent1.Chromosome.Count; i++)
+                {
+                    if (crossOver.Chromosome[i] == newVal)
+                    {
+                        jobToReplace = i;
+                    }
+                }
+
+                if (jobToReplace != -1)
+                {
+                    crossOver.Chromosome[jobToReplace] = old;
+                }
+                crossOvers.Add(crossOver);
             }
 
-            if (jobToReplace != -1)
-            {
-                parent1.Chromosome[jobToReplace] = old;
-            }
 
-            return parent1;
+            return crossOvers;
         }
 
         private List<Job> ScheduleCourses(SortedDictionary<int, List<Job>> jobs, bool mutate)
@@ -153,7 +192,10 @@
 
                 foreach (var job in orderedJobs)
                 {
-                    courseDna.Add(job);
+                    if (!courseDna.Contains(job))
+                    {
+                        courseDna.Add(job);
+                    }
                     ScheduleCourse(job);
                 }
             }

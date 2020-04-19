@@ -9,6 +9,8 @@ using System.Linq;
 
 namespace ScheduleEvaluatorTest
 {
+    using Models;
+
     [TestClass]
     public class EvaluatorTest
     {

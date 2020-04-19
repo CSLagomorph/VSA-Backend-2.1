@@ -4,6 +4,8 @@ using System.Text;
 
 namespace ScheduleEvaluator.ConcreteCriterias
 {
+    using Models;
+
     class CoreCreditsAQuarter : Criteria
     {
         public CoreCreditsAQuarter(double weight) : base(weight)

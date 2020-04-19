@@ -4,6 +4,8 @@ using System.Text;
 
 namespace ScheduleEvaluator.ConcreteCriterias
 {
+    using Models;
+
     class MajorSpecificBreaks : Criteria
     {
         public MajorSpecificBreaks(double weight) : base(weight)
