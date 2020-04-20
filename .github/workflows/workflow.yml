@@ -24,14 +24,14 @@ jobs:
     - name: Build Solution
       run: msbuild VaaApi/VaaApi.sln
 
-    - name: Azure Webapp Deploy
-      uses: azure/webapps-deploy@v2
-      with: 
-        app-name: VaaApi
-        publish-profile: ${{ secrets.azureWebAppPublishProfile }}
+#    - name: Azure Webapp Deploy
+#      uses: azure/webapps-deploy@v2
+#      with: 
+#        app-name: VaaApi
+#        publish-profile: ${{ secrets.azureWebAppPublishProfile }}
 
-    - name: Upload Package
-      uses: actions/upload-artifact@v1
-      with:
-        name: BuildArtifacts
-        path: vaaapi #Deploy IIS Path
+#    - name: Upload Package
+#      uses: actions/upload-artifact@v1
+#      with:
+#        name: BuildArtifacts
+#        path: vaaapi #Deploy IIS Path
