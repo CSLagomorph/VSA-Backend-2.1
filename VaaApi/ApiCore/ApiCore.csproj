@@ -286,7 +286,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CourseObject.cs" />
-    <Compile Include="Preferences.cs" />
+    <Compile Include="PreferenceHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

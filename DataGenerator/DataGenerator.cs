@@ -1,26 +1,32 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
-using Scheduler;
 
 
 namespace DataGenerator
 {
     using System.CodeDom;
     using System.Collections.Generic;
+    using System.Data;
     using System.Runtime.InteropServices;
     using ApiCore;
     using FluentAssertions;
+    using Models;
+    using ScheduleEvaluator;
+    using Scheduler;
+    using DBConnection = Scheduler.DBConnection;
+    using Preferences = Models.Preferences;
 
     [TestClass]
     public class DataGenerator
     {
         private DBConnection db;
         [TestInitialize]
-        public void Initialize() {
+        public void Initialize()
+        {
             db = new DBConnection();
         }
-        
+
         // This is commmented out to ignore this test. This test generates a lot of data
         // and should be ran sparingly as to not fill the database with a lot of redundant
         // test data.
@@ -29,28 +35,98 @@ namespace DataGenerator
         {
             var insertedList = new List<int>();
             var coursePrefList = new List<CourseObject>();
-            var courseObj = new CourseObject()
+            //var schools = new List<string>(){ "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16" };
+            //var majors = new List<string>(){ "1", "2", "3", "4", "6", "7", "8", "9", "10", "11", "12", "13", "14", "16", "17", "18", "19", "20", "21", "22", "23", "24", "26", "27", "28", "29", "30", "31", "32" };
+            var schools = new List<string>(){"6"};
+            var majors = new List<string>(){"22"};
+            foreach (string school in schools)
             {
-                school = "6",
-                courses = "5",
-                credits = "10",
-                major = "22",
-                quarters = "50",
-                enrollment = ((int)Constants.EnrollmentType.FullTime).ToString(),
-                job = ((int)Constants.JobType.Unemployed).ToString(),
-                summer = "N"
-            };
-            coursePrefList.Add(courseObj);
-            VaryEnrollment(courseObj, coursePrefList);
-            VaryJob(courseObj, coursePrefList);
-            VaryCredits(courseObj, coursePrefList);
-            GeneratePlan(coursePrefList, insertedList);
+                foreach (string major in majors)
+                {
+                    var courseObj = new CourseObject()
+                    {
+                        school = school,
+                        courses = "5",
+                        credits = "10",
+                        major = major,
+                        quarters = "20",
+                        enrollment = ((int)Constants.EnrollmentType.FullTime).ToString(),
+                        job = ((int)Constants.JobType.Unemployed).ToString(),
+                        summer = "N"
+                    };
+                    coursePrefList.Add(courseObj);
+                    VaryEnrollment(courseObj, coursePrefList);
+                    VaryJob(courseObj, coursePrefList);
+                    VaryCredits(courseObj, coursePrefList);
+                    VaryMaxCreditsPerQuarter(courseObj, coursePrefList);
+                    GeneratePlan(coursePrefList, insertedList);
+                }
+            }
+           
+           
             insertedList.Should().NotBeEmpty();
+        }
 
+        private void VaryMaxCreditsPerQuarter(CourseObject courseObj, List<CourseObject> coursePrefList)
+        {
+            var quarters = new List<int>() { 1, 2, 4, 8, 9, 12, 15 };
+            foreach (var credit in quarters)
+            {
+                var newCourseObj = new CourseObject()
+                {
+                    job = courseObj.job,
+                    school = courseObj.school,
+                    major = courseObj.major,
+                    credits = courseObj.credits,
+                    summer = courseObj.summer,
+                    enrollment = courseObj.enrollment,
+                    quarters = credit.ToString()
+                };
+                coursePrefList.Add(newCourseObj);
+            }
         }
 
         [TestMethod]
-        public void ComputerEngineeringPreReqRegularTest() {
+        public void GetAllRating()
+        {
+            var schedule = new List<int>() { };
+            var connection = new DBConnection();
+            var eval = new Evaluator();
+            var scheduleQuery = $"select GeneratedPlanId from GeneratedPlan";
+            var schedules = connection.ExecuteToDT(scheduleQuery);
+            foreach (DataRow schedulesRow in schedules.Rows)
+            {
+                schedule.Add((int)schedulesRow["GeneratedPlanId"]);
+            }
+            
+
+            foreach (int scheduleId in schedule)
+            {
+                var parameterQuery = $"select ParameterSetId from GeneratedPlan where GeneratedPlanId={scheduleId}";
+                var parameterId = (int)connection.ExecuteToDT(parameterQuery).Rows[0]["ParameterSetId"];
+
+                var parameterSetQuery = $"select ParameterSet.MajorID, SchoolID, MaxNumberOfQuarters, NumberCoreCoursesPerQuarter, CreditsPerQuarter, SummerPreference, DepartmentId from ParameterSet join Major on ParameterSet.MajorID = Major.MajorID" +
+                                        $" where ParameterSetId = {parameterId}";
+                var parameterSetResult = connection.ExecuteToDT(parameterSetQuery);
+
+                var parameters = Preferences.ConvertFromDatabase(parameterSetResult, parameterId);
+
+                var query = "select CourseNumber, QuarterID, YearID, Course.CourseId from StudyPlan" +
+                            " join course on Course.CourseID = StudyPlan.CourseID" +
+                            $" where GeneratedPlanID = {scheduleId}";
+
+                var results = connection.ExecuteToDT(query);
+                var model = ScheduleModel.ConvertFromDatabase(results, scheduleId, parameters);
+                var rating = eval.evalaute(model);
+
+                RatingHelper.UpdateWeakLabelScore(scheduleId, (int)rating);
+
+            }
+        }
+
+        [TestMethod]
+        public void ComputerEngineeringPreReqRegularTest()
+        {
             // Constants for a pre-determined major/school combo
             const string COMPUTER_ENGINEERING_MAJOR = "1";
             const string UNIVERSITY_WA = "1";
@@ -58,7 +134,7 @@ namespace DataGenerator
 
             // From my experience this seems to be a common schedule preference
             // set. Using this object as a concrete example to help debug and test.
-            int schedId = Preferences.ProcessPreference(new CourseObject()
+            int schedId = PreferenceHelper.ProcessPreference(new CourseObject()
             {
                 school = UNIVERSITY_WA,
                 credits = "10",
@@ -72,7 +148,7 @@ namespace DataGenerator
 
             // Check that a schedule has been been made
             Assert.AreNotEqual(0, schedId);
-            
+
             // The first check should be that all the prereqs are satisfied in the schedule.
             string result = db.ExecuteToString(getFulfillQueryString(schedId));
 
@@ -85,7 +161,8 @@ namespace DataGenerator
 
         // Very similar to the above, although this method tests the shortest schedule.s
         [TestMethod]
-        public void ComputerEngineeringPreReqShortTest() {
+        public void ComputerEngineeringPreReqShortTest()
+        {
             // Constants for a pre-determined major/school combo
             const string COMPUTER_ENGINEERING_MAJOR = "1";
             const string UNIVERSITY_WA = "1";
@@ -93,7 +170,7 @@ namespace DataGenerator
 
             // From my experience this seems to be a common schedule preference
             // set. Using this object as a concrete example to help debug and test.
-            int schedId = Preferences.ProcessPreference(new CourseObject()
+            int schedId = PreferenceHelper.ProcessPreference(new CourseObject()
             {
                 school = UNIVERSITY_WA,
                 credits = "10",
@@ -118,14 +195,16 @@ namespace DataGenerator
             Debug.WriteLine("THIS IS THE OUTPUT for ID" + schedId + " " + result);
         }
 
-        private string getFulfillQueryString(int id) { 
-            return "SELECT COUNT(*) FROM (SELECT DISTINCT PrerequisiteCourseID as PID " + 
-                "FROM StudyPlan as sp, Prerequisite as p WHERE sp.CourseID = p.CourseID AND sp.GeneratedPlanID = " + id + ") as interim " + 
+        private string getFulfillQueryString(int id)
+        {
+            return "SELECT COUNT(*) FROM (SELECT DISTINCT PrerequisiteCourseID as PID " +
+                "FROM StudyPlan as sp, Prerequisite as p WHERE sp.CourseID = p.CourseID AND sp.GeneratedPlanID = " + id + ") as interim " +
                 "LEFT JOIN StudyPlan as p ON interim.PID = p.CourseID " +
                 "WHERE p.GeneratedPlanID is NULL";
         }
 
-        private string getScheduleQueryString(int id) {
+        private string getScheduleQueryString(int id)
+        {
             return "SELECT   YearID as YID, CourseID as CID " +
                 "FROM StudyPlan WHERE GeneratedPlanID = " + id +
                 "ORDER BY QuarterID ASC";
@@ -192,7 +271,7 @@ namespace DataGenerator
         {
             foreach (var courseObject in courseObj)
             {
-                var insertedId = Preferences.ProcessPreference(courseObject, true);
+                var insertedId = PreferenceHelper.ProcessPreference(courseObject, true);
                 insertedId.Should().NotBe(0);
                 insertedList.Add(insertedId);
             }

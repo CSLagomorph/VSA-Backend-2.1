@@ -10,6 +10,9 @@
 namespace Models
 {
     using System;
+    using System.Collections.Generic;
+    using System.Data;
+    using System.Linq;
 
     public class Preferences
     {
@@ -25,19 +28,44 @@ namespace Models
         public int PreferredMathStart { get; set; }
         public int DepartmentID { get; set; }
         public int CoreCountLastYear { get; set; }
-        public int MaxQuarters
-        {
-            get
-            {
-                return this.MaxQuarters;
-            }
-            set
-            {
-                if (value < 0)
-                    throw new ArgumentException("Max Quarters Must be Greater than 0");
-                this.MaxQuarters = value;
-            }
-        }
+        public int MaxQuarters { get; set; }
+        public int SchoolId { get; set; }
 
+        public static Preferences ConvertFromDatabase(DataTable results, int id)
+        {
+            var pref = new Preferences();
+            foreach (DataRow row in results.Rows)
+            {
+                var major = (int)row["MajorId"];
+                var school = (int)row["SchoolId"];
+                var maxNumQuarter = (int)row["MaxNumberOfQuarters"];
+                int corePerQuarter = 0;
+                if (row["NumberCoreCoursesPerQuarter"] != DBNull.Value)
+                {
+                    corePerQuarter = (int)row["NumberCoreCoursesPerQuarter"];
+                }
+                int credits = 0;
+                if (row["CreditsPerQuarter"] != DBNull.Value)
+                {
+                    credits = (int)row["CreditsPerQuarter"];
+                }
+                
+                var summer =(string)row["SummerPreference"];
+                int department = 0;
+                if (row["DepartmentId"] != DBNull.Value)
+                {
+                    department = (int)row["DepartmentId"];
+                }
+                pref.MaxQuarters = maxNumQuarter;
+                pref.MajorID = major;
+                pref.SchoolId = school;
+                pref.CreditsPerQuarter = credits;
+                pref.SummerPreference = summer == "Y";
+                pref.DepartmentID = department;
+                pref.CoreCoursesPerQuarter = corePerQuarter;
+            }
+
+            return pref;
+        }
     }
 }

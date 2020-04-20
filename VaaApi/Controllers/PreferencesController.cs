@@ -24,7 +24,7 @@ namespace VaaApi.Controllers
         {
             try
             {
-                int id = Preferences.ProcessPreference(content);
+                int id = PreferenceHelper.ProcessPreference(content);
                 return id.ToString();
             }
             catch (Exception e)

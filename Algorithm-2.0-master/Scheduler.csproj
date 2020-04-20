@@ -318,6 +318,7 @@
     <Compile Include="Algorithms\JobShopScheduler.cs" />
     <Compile Include="Algorithms\OpenShopScheduler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RatingHelper.cs" />
     <Compile Include="SchedulerExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -337,6 +338,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Models\Models.csproj">
+      <Project>{99f2b340-c755-407f-bffa-d3ca1ec56137}</Project>
+      <Name>Models</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ScheduleEvaluator\ScheduleEvaluator.csproj">
       <Project>{42c65954-791a-437d-bddb-5611aa0b0abf}</Project>
       <Name>ScheduleEvaluator</Name>
