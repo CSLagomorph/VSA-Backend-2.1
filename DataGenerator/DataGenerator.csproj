@@ -57,6 +57,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
@@ -73,6 +74,14 @@
     <ProjectReference Include="..\Algorithm-2.0-master\Scheduler.csproj">
       <Project>{8C48265C-A39C-49C4-8ACD-71B6EB5F7980}</Project>
       <Name>Scheduler</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Models\Models.csproj">
+      <Project>{99f2b340-c755-407f-bffa-d3ca1ec56137}</Project>
+      <Name>Models</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ScheduleEvaluator\ScheduleEvaluator.csproj">
+      <Project>{42c65954-791a-437d-bddb-5611aa0b0abf}</Project>
+      <Name>ScheduleEvaluator</Name>
     </ProjectReference>
     <ProjectReference Include="..\VaaApi\ApiCore\ApiCore.csproj">
       <Project>{6a1ff494-d2f4-4be7-a731-0e1c3b33908b}</Project>

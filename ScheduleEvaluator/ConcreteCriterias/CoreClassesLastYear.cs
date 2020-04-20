@@ -4,11 +4,12 @@ using System.Text;
 
 namespace ScheduleEvaluator.ConcreteCriterias
 {
+    using Models;
+
     class CoreClassesLastYear : Criteria
     {
         public CoreClassesLastYear(double weight) : base(weight)
         {
-            throw new NotImplementedException();
         }
 
         public override double getResult(ScheduleModel s)

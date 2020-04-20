@@ -6,11 +6,17 @@
 //
 //    var welcome = ScheduleModel.FromJson(jsonString);
 
-namespace VaaApi
+// This class was copied from the VaaApi coreapi created by Rigdha.
+// Feel free to alter the fields of this class to better store important information that
+// we need.
+
+namespace Models
 {
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.Globalization;
+    using System.Linq;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
 
@@ -39,6 +45,39 @@ namespace VaaApi
 
         [JsonProperty("quarters")]
         public List<Quarter> Quarters { get; set; }
+        [JsonIgnore]
+        public Preferences PreferenceSet { get; set; }
+
+        public static ScheduleModel ConvertFromDatabase(DataTable results, int id, Models.Preferences preferences)
+        {
+            var model = new ScheduleModel
+            {
+                Quarters = new List<Quarter>(),
+                Id = id
+            };
+            foreach (DataRow row in results.Rows)
+            {
+                var courseName = (string)row["CourseNumber"];
+                var quarter = (int)row["QuarterID"];
+                var year = (int)row["YearID"];
+                var courseId = (int)row["CourseId"];
+                var quarterItem = model.Quarters.FirstOrDefault(s => s.Id == $"{year}{quarter}" && s.Year == year);
+                if (quarterItem == null)
+                {
+                    model.Quarters.Add(new Quarter() { Id = $"{year}{quarter}", Title = $"{year}-{quarter}", Year = year });
+                    quarterItem = model.Quarters.First(s => s.Id == $"{year}{quarter}" && s.Year == year);
+                }
+
+                if (quarterItem.Courses == null)
+                {
+                    quarterItem.Courses = new List<Course>();
+                }
+                quarterItem.Courses.Add(new Course() { Description = courseName + $"({courseId})", Id = courseName, Title = courseName + $"({courseId})" });
+            }
+
+            model.PreferenceSet = preferences;
+            return model;
+        }    
     }
 
     public partial class Metadata
@@ -60,6 +99,8 @@ namespace VaaApi
 
         [JsonProperty("courses")]
         public List<Course> Courses { get; set; }
+
+        public int QuarterKey { get; set; }
     }
 
     public partial class Course
@@ -72,6 +113,8 @@ namespace VaaApi
 
         [JsonProperty("description")]
         public string Description { get; set; }
+        [JsonProperty("departmentID")]
+        public int DepartmentID { get; set; }
     }
 
     internal static class Converter

@@ -4,6 +4,8 @@ using System.Text;
 
 namespace ScheduleEvaluator.ConcreteCriterias
 {
+    using Models;
+
     class EnglishTime : Criteria
     {
         public EnglishTime(double weight) : base(weight)

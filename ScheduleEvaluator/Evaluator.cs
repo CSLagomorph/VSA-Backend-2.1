@@ -9,13 +9,15 @@ using System.Text;
 
 namespace ScheduleEvaluator
 {
+    using Models;
+
     public class Evaluator
     {
         // These fields are hardcoded before program runtime. They define the preferences and the weights associated with
         // each preference. For now these two structures are going to stay as fields, but in the future they may migrate to passed
         // in paramaters.
-        public static readonly CritTyp[] criteriaTypes = { CritTyp.AllPrereqs };
-        public static readonly double[] weights = { 1.0 };
+        public static readonly CritTyp[] criteriaTypes = { CritTyp.CoreCreditsAQuarter, CritTyp.MaxQuarters };
+        public static readonly double[] weights = { 1.0, 1.0 };
 
         // This field holds all of the criteria objects that are created by the Criteria factory.
         private Criteria[] criterias;

@@ -3,7 +3,7 @@
 namespace Scheduler {
     using System;
 
-    class DegreePlan {
+    public class DegreePlan {
 
         #region NOTES
         /*
