@@ -35,23 +35,55 @@ namespace DataGenerator
         {
             var insertedList = new List<int>();
             var coursePrefList = new List<CourseObject>();
-            var courseObj = new CourseObject()
+            //var schools = new List<string>(){ "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16" };
+            //var majors = new List<string>(){ "1", "2", "3", "4", "6", "7", "8", "9", "10", "11", "12", "13", "14", "16", "17", "18", "19", "20", "21", "22", "23", "24", "26", "27", "28", "29", "30", "31", "32" };
+            var schools = new List<string>(){"6"};
+            var majors = new List<string>(){"22"};
+            foreach (string school in schools)
             {
-                school = "6",
-                courses = "5",
-                credits = "10",
-                major = "22",
-                quarters = "50",
-                enrollment = ((int)Constants.EnrollmentType.FullTime).ToString(),
-                job = ((int)Constants.JobType.Unemployed).ToString(),
-                summer = "N"
-            };
-            coursePrefList.Add(courseObj);
-            //VaryEnrollment(courseObj, coursePrefList);
-            //VaryJob(courseObj, coursePrefList);
-            //VaryCredits(courseObj, coursePrefList);
-            GeneratePlan(coursePrefList, insertedList);
+                foreach (string major in majors)
+                {
+                    var courseObj = new CourseObject()
+                    {
+                        school = school,
+                        courses = "5",
+                        credits = "10",
+                        major = major,
+                        quarters = "20",
+                        enrollment = ((int)Constants.EnrollmentType.FullTime).ToString(),
+                        job = ((int)Constants.JobType.Unemployed).ToString(),
+                        summer = "N"
+                    };
+                    coursePrefList.Add(courseObj);
+                    VaryEnrollment(courseObj, coursePrefList);
+                    VaryJob(courseObj, coursePrefList);
+                    VaryCredits(courseObj, coursePrefList);
+                    VaryMaxCreditsPerQuarter(courseObj, coursePrefList);
+                    GeneratePlan(coursePrefList, insertedList);
+                }
+            }
+           
+           
             insertedList.Should().NotBeEmpty();
+        }
+
+        private void VaryMaxCreditsPerQuarter(CourseObject courseObj, List<CourseObject> coursePrefList)
+        {
+            var quarters = new List<int>() { 1, 2, 4, 8, 9, 12, 15 };
+            foreach (var credit in quarters)
+            {
+                var newCourseObj = new CourseObject()
+                {
+                    job = courseObj.job,
+                    school = courseObj.school,
+                    major = courseObj.major,
+                    credits = courseObj.credits,
+                    summer = courseObj.summer,
+                    enrollment = courseObj.enrollment,
+                    quarters = credit.ToString()
+                };
+                coursePrefList.Add(newCourseObj);
+            }
         }
 
         [TestMethod]

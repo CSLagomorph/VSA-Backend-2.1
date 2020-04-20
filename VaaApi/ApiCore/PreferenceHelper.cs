@@ -60,13 +60,13 @@ namespace ApiCore
 
             int insertedId = 0;
             var DBPlugin = new DBConnection();
-
+            int rating = schedule.Rating;
             try
             {
                 var schedulerSettings = JsonConvert.SerializeObject(schedule.ScheduleSettings);
                 DBPlugin.ExecuteToString(
-                    $"insert into GeneratedPlan (Name, ParameterSetID, DateAdded, LastDateModified, Status, SchedulerName, SchedulerSettings) " +
-                    $"Values ('latest', {id}, '{DateTime.UtcNow}', '{DateTime.UtcNow}', {1}, '{schedule.SchedulerName}', '{schedulerSettings}')");
+                    $"insert into GeneratedPlan (Name, ParameterSetID, DateAdded, LastDateModified, Status, SchedulerName, SchedulerSettings, WeakLabelScore) " +
+                    $"Values ('latest', {id}, '{DateTime.UtcNow}', '{DateTime.UtcNow}', {1}, '{schedule.SchedulerName}', '{schedulerSettings}', {rating})");
                 var idString = DBPlugin.ExecuteToString("SELECT IDENT_CURRENT('GeneratedPlan')");
                 insertedId = Convert.ToInt32(idString);
                 scheduleModel.Id = insertedId;

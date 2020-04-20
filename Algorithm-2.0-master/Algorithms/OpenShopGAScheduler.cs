@@ -7,6 +7,7 @@
     using Contracts;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
+    using ScheduleEvaluator;
 
     /// <summary>
     /// Implements the Open Shop Scheduling algorithm with genetic algorithm
@@ -22,7 +23,7 @@
         // 
         //------------------------------------------------------------------------------
 
-        public OpenShopGAScheduler(int paramID,  Models.Preferences preferences, bool preferShortest = true, OpenShopGASchedulerSettings currentBestFit = null)
+        public OpenShopGAScheduler(int paramID, Models.Preferences preferences, bool preferShortest = true, OpenShopGASchedulerSettings currentBestFit = null)
         {
             this.CurrentBestFit = currentBestFit;
             this.Preferences = preferences;
@@ -66,13 +67,22 @@
                     Courses = this.Schedule,
                     SchedulerName = nameof(OpenShopGAScheduler),
                     ScheduleSettings = settings,
-                    Rating = rand.Next(5)
                 };
+                var rating = GetRating(sched);
+                sched.Rating = rating;
                 populationSet.Add(sched);
             }
 
             var fittest = SelectFittest(populationSet, level, topPercentToKeep, currentBestFit);
             return fittest.OrderByDescending(s => s.Rating).First();
+        }
+
+        private int GetRating(Schedule sched)
+        {
+            var scheduleModel = sched.ConvertToScheduleModel();
+            scheduleModel.PreferenceSet = this.Preferences;
+            var eval = new Evaluator();
+            return (int)eval.evalaute(scheduleModel);
         }
 
         public List<Schedule> SelectFittest(List<Schedule> populationSet, int level = 20, int topPercentToKeep = 95, OpenShopGASchedulerSettings currentBestFit = null)
@@ -96,8 +106,9 @@
                     Courses = this.Schedule,
                     SchedulerName = nameof(OpenShopGAScheduler),
                     ScheduleSettings = currentBestFit,
-                    Rating = rand.Next(5)
                 };
+                var rating = GetRating(topSchedule);
+                topSchedule.Rating = rating;
             }
 
             var cutoff = populationSet.Count * topPercentToKeep / 100;
@@ -125,8 +136,9 @@
                         Courses = this.Schedule,
                         SchedulerName = nameof(OpenShopGAScheduler),
                         ScheduleSettings = crossOver,
-                        Rating = rand.Next(5)
                     };
+                    var rating = GetRating(offspring);
+                    offspring.Rating = rating;
                     offSprings.Add(offspring);
                 }
 
@@ -141,6 +153,7 @@
         {
             var random = new Random();
             var lowest = parent1.Chromosome.Count < parent2.Chromosome.Count ? parent1.Chromosome.Count : parent2.Chromosome.Count;
+            if (parent1.Chromosome.Count <= 0) return new List<OpenShopGASchedulerSettings>(){parent1};
             var crossOvers = new List<OpenShopGASchedulerSettings>();
             for (int i = 0; i < count; i++)
             {
