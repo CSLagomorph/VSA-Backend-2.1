@@ -14,6 +14,7 @@ namespace VaaApi.Controllers
     using System.Web.Http.Results;
     using Models;
     using Newtonsoft.Json;
+    using Scheduler.Contracts;
 
     public class SchedulesController : ApiController
     {
@@ -21,36 +22,22 @@ namespace VaaApi.Controllers
         [EnableCors(origins: "*", headers: "*", methods: "*")]
         public string Get(int id)
         {
-            var model = new ScheduleModel
-            {
-                Quarters = new List<Quarter>(),
-                Id = id
-            };
+            var connection = new DBConnection();
+            var parameterQuery = $"select ParameterSetId from GeneratedPlan where GeneratedPlanId={id}";
+            var parameterId = (int)connection.ExecuteToDT(parameterQuery).Rows[0]["ParameterSetId"];
+
+            var parameterSetQuery= $"select ParameterSet.MajorID, SchoolID, MaxNumberOfQuarters, NumberCoreCoursesPerQuarter, CreditsPerQuarter, SummerPreference, DepartmentId from ParameterSet join Major on ParameterSet.MajorID = Major.MajorID"+
+            $" where ParameterSetId = {parameterId}";
+            var parameterSetResult = connection.ExecuteToDT(parameterSetQuery);
+
+            var parameters = Preferences.ConvertFromDatabase(parameterSetResult, parameterId);
             var query = "select CourseNumber, QuarterID, YearID, Course.CourseId from StudyPlan" +
                         " join course on Course.CourseID = StudyPlan.CourseID" +
                         $" where GeneratedPlanID = {id}";
 
-            var connection = new DBConnection();
+            
             var results = connection.ExecuteToDT(query);
-            foreach (DataRow row in results.Rows)
-            {
-                var courseName = (string) row["CourseNumber"];
-                var quarter = (int) row["QuarterID"];
-                var year = (int) row["YearID"];
-                var courseId = (int) row["CourseId"];
-                var quarterItem=model.Quarters.FirstOrDefault(s => s.Id == $"{year}{quarter}" && s.Year == year);
-                if (quarterItem == null)
-                {
-                    model.Quarters.Add(new Quarter(){Id = $"{year}{quarter}", Title = $"{year}-{quarter}", Year = year});
-                    quarterItem = model.Quarters.First(s => s.Id == $"{year}{quarter}" && s.Year == year);
-                }
-
-                if (quarterItem.Courses == null)
-                {
-                    quarterItem.Courses = new List<Course>();
-                }
-                quarterItem.Courses.Add(new Course(){Description = courseName+$"({courseId})", Id = courseName, Title = courseName + $"({courseId})" });
-            }
+            var model = ScheduleModel.ConvertFromDatabase(results, id, parameters);
 
             var response = JsonConvert.SerializeObject(model);
             return response;

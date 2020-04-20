@@ -14,6 +14,7 @@
     public class OpenShopGAScheduler : SchedulerBase, IScheduler
     {
         private OpenShopGASchedulerSettings CurrentBestFit = null;
+        private Models.Preferences Preferences = null;
         #region Constructor
         //------------------------------------------------------------------------------
         // 
@@ -21,9 +22,10 @@
         // 
         //------------------------------------------------------------------------------
 
-        public OpenShopGAScheduler(int paramID, bool preferShortest = true, OpenShopGASchedulerSettings currentBestFit = null)
+        public OpenShopGAScheduler(int paramID,  Models.Preferences preferences, bool preferShortest = true, OpenShopGASchedulerSettings currentBestFit = null)
         {
             this.CurrentBestFit = currentBestFit;
+            this.Preferences = preferences;
             SetUp(paramID);
             MakeStartingPoint();
             InitDegreePlan();

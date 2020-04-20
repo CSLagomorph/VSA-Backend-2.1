@@ -10,7 +10,6 @@ namespace ScheduleEvaluator.ConcreteCriterias
     {
         public CoreCreditsAQuarter(double weight) : base(weight)
         {
-            throw new NotImplementedException();
         }
 
         public override double getResult(ScheduleModel s)
