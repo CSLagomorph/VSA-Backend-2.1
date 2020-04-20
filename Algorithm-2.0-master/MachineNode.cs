@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 
 namespace Scheduler {
-    class MachineNode {
+    public class MachineNode {
         #region NOTES
         /*
          * From what I gather, each MachineNode represents a Quarter of scheduled "Machines" or,

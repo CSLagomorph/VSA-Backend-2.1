@@ -4,6 +4,8 @@ using System.Text;
 
 namespace ScheduleEvaluator.ConcreteCriterias
 {
+    using Models;
+
     class MaxQuarters : Criteria
     {
         public MaxQuarters(double weight) : base(weight)
@@ -17,7 +19,8 @@ namespace ScheduleEvaluator.ConcreteCriterias
         // scheduled number of quarters. 
         public override double getResult(ScheduleModel s)
         {
-            return Math.Abs(s.Quarters.Count - s.PreferenceSet.MaxQuarters);
+            if (s.Quarters.Count > s.PreferenceSet.MaxQuarters) return 0;
+            return 1;
         }
     }
 }

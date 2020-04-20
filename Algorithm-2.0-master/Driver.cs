@@ -1,20 +1,28 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace Scheduler {
-    public class Driver {
+namespace Scheduler
+{
+    using Algorithms;
+
+    public class Driver
+    {
         //------------------------------------------------------------------------------
         // The driver is used to run the scheduler. Either Method is a valid means to run
         // the scheduler. Should function calls be made to alter the preferences
         // CreateScheduler() would need to be ran again to ensure correct output.
         //------------------------------------------------------------------------------
-        static void Main(string[] args) {
+        static void Main(string[] args)
+        {
             #region Method 1: Manual Input of Preferences
-            Scheduler scheduler = new Scheduler(16, false);
+            JobShopScheduler scheduler = new JobShopScheduler(335, false);
             //scheduler.MakeStartingPoint("ENGL& 101", "MATH& 141");
-            scheduler.InitDegreePlan(22, 6); //get this from UI later
-            scheduler.CreateSchedule(true);
+            var r1 = scheduler.CreateSchedule(true);
             #endregion
+
+            OpenShopScheduler scheduler2 = new OpenShopScheduler(335, false);
+            //scheduler.MakeStartingPoint("ENGL& 101", "MATH& 141");
+            var r2 = scheduler.CreateSchedule(true);
 
             //#region Method 2: Automated based off of ParameterSetID
             //Scheduler scheduler = new Scheduler(1);

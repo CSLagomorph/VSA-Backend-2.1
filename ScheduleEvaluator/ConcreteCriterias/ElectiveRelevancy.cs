@@ -4,6 +4,8 @@ using System.Text;
 
 namespace ScheduleEvaluator.ConcreteCriterias
 {
+    using Models;
+
     class ElectiveRelevancy : Criteria
     {
        public ElectiveRelevancy(double weight) : base(weight)
