@@ -115,6 +115,8 @@ namespace Models
         public string Description { get; set; }
         [JsonProperty("departmentID")]
         public int DepartmentID { get; set; }
+        [JsonProperty("timeOfDay")]
+        public string TimeOfDay { get; set; }
     }
 
     internal static class Converter
