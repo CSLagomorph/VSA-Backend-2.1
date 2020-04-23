@@ -40,8 +40,8 @@ namespace ScheduleEvaluator
                     Criterias[i] = new CoreCreditsAQuarter(w);
                 else if (ct == CritTyp.ElectiveRelevancy)
                     Criterias[i] = new ElectiveRelevancy(w);
-                else if (ct == CritTyp.EnglishTime)
-                    Criterias[i] = new EnglishTime(w);
+                else if (ct == CritTyp.EnglishStart)
+                    Criterias[i] = new EnglishStart(w);
                 else if (ct == CritTyp.MajorSpecificBreaks)
                     Criterias[i] = new MajorSpecificBreaks(w);
                 else if (ct == CritTyp.MathBreaks)

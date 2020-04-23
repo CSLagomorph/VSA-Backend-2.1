@@ -56,8 +56,8 @@ _(All of the criteria outlined below has been derived from the Weak Labeling Cri
 | CoreClassesLastYear | Validates that the number of core classes scheduled for the last quarter is at or below the student preference. |
 | CoreCreditsAQuarter | Validates that the number of core credits taken each quarter are at or below the student preference. |
 | ElectiveRelevancy   | Validates that the electives taken are relevant to major course work? |
-| EnglishTimes        | Validates that any English courses are scheduled before or on a specific quarter. |
-| MajorSpecificBreaks | Validates that there are no core classes that have breaks between them |
+| EnglishTimes        | Validates that the first English Course taken matches the preferred English Course |
+| MajorSpecificBreaks | Validates that the first Math Course taken matches the preferred Math Course |
 | MathBreaks          | Validates that there are no breaks in any math sequence      |
 | MaxQuarters         | Validates that the number of quarters scheduled do not exceed the preferred number of quarters scheduled. |
 | PreprequisiteOrder  | Validates that no course is scheduled before all of the prerequisites are satisfied. |
