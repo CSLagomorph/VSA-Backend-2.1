@@ -12,7 +12,7 @@ namespace ScheduleEvaluator
         CoreClassesLastYear,
         CoreCreditsAQuarter,
         ElectiveRelevancy,
-        EnglishTime,
+        EnglishStart,
         MajorSpecificBreaks,
         MathBreaks,
         MaxQuarters,

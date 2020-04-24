@@ -22,7 +22,7 @@ namespace Models
         public int CoreCoursesPerQuarter { get; set; }
         public int PreferredEnglishStart { get; set; }
         public int QuarterPreference { get; set; }
-        public int TimePreference { get; set; }
+        public string TimePreference { get; set; }
         public int CreditsPerQuarter { get; set; }
         public Boolean SummerPreference { get; set; }
         public int PreferredMathStart { get; set; }
@@ -39,6 +39,7 @@ namespace Models
                 var major = (int)row["MajorId"];
                 var school = (int)row["SchoolId"];
                 var maxNumQuarter = (int)row["MaxNumberOfQuarters"];
+                var timePreference = (string)row["Timeperiod"];
                 int corePerQuarter = 0;
                 if (row["NumberCoreCoursesPerQuarter"] != DBNull.Value)
                 {
@@ -63,6 +64,7 @@ namespace Models
                 pref.SummerPreference = summer == "Y";
                 pref.DepartmentID = department;
                 pref.CoreCoursesPerQuarter = corePerQuarter;
+                pref.TimePreference = timePreference;
             }
 
             return pref;
