@@ -23,8 +23,8 @@ namespace ScheduleEvaluator.ConcreteCriterias
             foreach (Quarter q in s.Quarters) {
                 foreach (Course c in q.Courses) {
                     if (c.DepartmentID == ENGLISH_DEPARTMENT) {
-                        return Int32.Parse(c.Description) == s.PreferenceSet.PreferredEnglishStart ?
-                            1.0 : 0.0;
+                        return (Int32.Parse(c.Description) == s.PreferenceSet.PreferredEnglishStart ?
+                            1.0 : 0.0) * weight;
                     }
                 }
             }

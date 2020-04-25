@@ -19,7 +19,7 @@ namespace ScheduleEvaluator.ConcreteCriterias
         // scheduled number of quarters. 
         public override double getResult(ScheduleModel s)
         {
-            return s.Quarters.Count > s.PreferenceSet.MaxQuarters ? 0 : 1;
+            return (s.Quarters.Count > s.PreferenceSet.MaxQuarters ? 0 : 1) * weight;
         }
     }
 }
