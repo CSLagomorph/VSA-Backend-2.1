@@ -37,7 +37,7 @@ namespace ScheduleEvaluator.ConcreteCriterias
                 
                 }
             }
-            return totalGap > 0 ? 0.0 : 1.0;
+            return (totalGap > 0 ? 0.0 : 1.0) * weight;
         }
 
         private Boolean hasMajorCourse(Quarter q, int deptID) {

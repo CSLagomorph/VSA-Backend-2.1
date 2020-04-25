@@ -44,9 +44,13 @@ namespace ScheduleEvaluator
         // criteria this function is able to assign a score to the schedule.
         public double evalaute(ScheduleModel s) {
             double result = 0;
-            foreach (Criteria c in criterias) 
+            double totalWeight = 0;
+            foreach (Criteria c in criterias)
+            {
                 result += c.getResult(s);
-            return result;
+                totalWeight += c.weight;
+            }
+            return result / totalWeight;
         }
     
     }

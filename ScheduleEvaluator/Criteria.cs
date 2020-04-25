@@ -11,7 +11,7 @@ namespace ScheduleEvaluator
 
     abstract class Criteria
     {
-        private readonly double weight;
+        public readonly double weight;
         public Criteria(double weight) {
             this.weight = weight;
         }

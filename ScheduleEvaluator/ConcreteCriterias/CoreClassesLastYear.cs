@@ -30,7 +30,7 @@ namespace ScheduleEvaluator.ConcreteCriterias
                     }
                 }
             }
-            return s.PreferenceSet.CoreCountLastYear >= sum ? 1.0 : 0.0;
+            return (s.PreferenceSet.CoreCountLastYear >= sum ? 1.0 : 0.0) * weight;
         }
     }
 }
