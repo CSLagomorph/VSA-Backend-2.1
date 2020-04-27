@@ -56,7 +56,7 @@ namespace ScheduleEvaluatorTestFramework
             };
 
             string query = "SELECT CourseNumber as CNUM, QuarterID as QID, YearID as YID, " +
-                "Course.CourseId as CID, DepartmentID as DID " +
+                "c.CourseId as CID, DepartmentID as DID " +
                 "FROM StudyPlan as sp JOIN course as c ON c.CourseID = sp.CourseID " +
                 $" WHERE GeneratedPlanID = {generatedPlanID}";
             DataTable table = conn.ExecuteToDT(query);
@@ -90,12 +90,11 @@ namespace ScheduleEvaluatorTestFramework
         private Preferences GetPreferencesFromDB(int preferenceSetID)
         {
             Preferences result;
-            string query = "SELECT MajorID as MID, NumberCoreCoursesPerQuarter as CPQ, MaxNumberofQuarters as MNQ, " +
-                "CreditsPerQuarter as CreditsPQ, SummerPreference as SP, PreferredMathStart as PMS, " +
-                "PreferredEnglishStart as PES, QuarterPreferenceID as Q, TimePreferenceID as T, DepartmentID as DID " +
-                "FROM ParameterSet as ps " +
-                "JOIN Major as m on m.MajorID = sp.MajorID" +
-                $"WHERE ps.parameterSetID = {preferenceSetID}";
+            string query = "SELECT sp.MajorID as MID, NumberCoreCoursesPerQuarter as CPQ, MaxNumberofQuarters as MNQ, " +
+                "CreditsPerQuarter as CreditsPQ, SummerPreference as SP, PreferedMathStart as PMS, " +
+                "PreferedEnglishStart as PES, QuarterPreferenceID as Q, TimePreferenceID as T, DepartmentID as DID " +
+                "FROM ParameterSet as sp JOIN Major as m on m.MajorID = sp.MajorID " +
+                $"WHERE sp.parameterSetID = {preferenceSetID}";
             DataTable table = conn.ExecuteToDT(query);
 
             if (table.Rows.Count == 0)
@@ -115,7 +114,7 @@ namespace ScheduleEvaluatorTestFramework
                 // type they are of
                 PreferredEnglishStart = (int)row["PES"],
                 QuarterPreference = (int)row["Q"],
-                TimePreference = (string)row["T"],
+                TimePreference = row["T"].ToString(),
                 CreditsPerQuarter = (int)row["CreditsPQ"],
                 SummerPreference = ((string)row["SP"]).Equals("Yes"),
                 PreferredMathStart = (int)row["PMS"],
