@@ -6,7 +6,7 @@ namespace ScheduleEvaluator.ConcreteCriterias
 {
     using Models;
 
-    class CoreCreditsAQuarter : Criteria
+    public class CoreCreditsAQuarter : Criteria
     {
         public CoreCreditsAQuarter(double weight) : base(weight)
         {
