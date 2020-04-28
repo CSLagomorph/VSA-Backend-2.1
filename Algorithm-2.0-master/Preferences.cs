@@ -63,7 +63,7 @@ namespace Scheduler {
         public Preferences(int parameterID)
         {
             dbHit = new DBConnection();
-            JsonString = "Data Source = 65.175.68.34; Initial Catalog = vsaDev; Persist Security Info = True; User ID = sa; Password = kD$wg&OUrhfC6AMMq6q5Xh"j;
+            JsonString = "";
             JsonString = dbHit.ExecuteToString("select * from ParameterSet where ParameterSetID =" + parameterID + "for JSON AUTO;");
             Deserialize();
             //SetPriors();

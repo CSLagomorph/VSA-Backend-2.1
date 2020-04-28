@@ -174,7 +174,7 @@ namespace Scheduler {
                         Console.Write(courseNetwork[i].prereqs[j].prerequisiteID + ", ");
                         //Console.Write(courseNetwork[i].prereqs[j].groupID + "; ");
                     }
-                    Console.WriteLine("Data Source = 65.175.68.34; Initial Catalog = vsaDev; Persist Security Info = True; User ID = sa; Password = kD$wg&OUrhfC6AMMq6q5Xh"j); //End Line for readaability
+                    Console.WriteLine(""); //End Line for readaability
                 }
             }
         }
@@ -198,7 +198,7 @@ namespace Scheduler {
                             for (int j = 0; j < targetList[i].prereqs.Count; j++) {
                                 Console.Write(targetList[i].prereqs[j].prerequisiteID + "; ");
                             }
-                            Console.WriteLine("Data Source = 65.175.68.34; Initial Catalog = vsaDev; Persist Security Info = True; User ID = sa; Password = kD$wg&OUrhfC6AMMq6q5Xh"j);
+                            Console.WriteLine("");
                         }
                     }
                 } else {

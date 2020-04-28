@@ -10,7 +10,7 @@ To help accommodate the changing weight on preferences, types of preferences, an
 
 ### Evaluator.cs 
 
-This object controls the main flow of the algorithm. This class has two class constants. These dictate how the schedules are evaluated and how each criteria is weighted.  The first is an array of type `CritTyp` this type is explained [here](#CritTyp.cs) and the second type is an array of doubles. This second array contains the weights corresponding to each Criteria in the `CritTyp` array. ___The doubles in the array must sum to 1___ 
+This object controls the main flow of the algorithm. There are two constructors for the Evaluator. The first is used for development and __should not__ be used in  production. The Criteria types and weights are hard coded in this method. That means they are immutable unless the code is changed, compiled and re-deployed. The second constructor takes in a JSON string. This string is then checked against a JSON schema, `Criteria-Weights-Schema.json`. This JSON string should contain all of the necessary information to build the correct criteria and with their assigned weight.
 
 To be used in the evaluate function, the constructor builds an array of type `Criteria` (_to see the explanation of the class `Criteria` go [here](#Criteria.cs)_). This array is kept in memory for multiple calls to the evaluate function. The array is built using the `CriteriaFactory` object. Where `CriteriaFactory` accepts an array of `CritTyp` and an array of doubles in its constructor and can be called on to return an array of `Criteria` objects. 
 
@@ -63,6 +63,18 @@ _(All of the criteria outlined below has been derived from the Weak Labeling Cri
 | PreprequisiteOrder  | Validates that no course is scheduled before all of the prerequisites are satisfied. |
 | TimeOfDay           | Validates that all courses are scheduled at the preferred time of day. |
 
-__Add header for Schedule.cs__
+## Schedule Model
+
+The schedule model that is used is pulled from the Models C sharp Project and should be added to the sln for development purposes. The Schedule Model, stores the information for a schedule. It is broken up into quarters and each quarter contains a list of courses. 
+
+## Preferences
+
+This class is also in the C sharp Models project. This class contains all of the information for a students preferences. The information that is used to fill this structure is pulled from the Parameter Set Table in the VSA Dev database.  As more criteria is added to the Evaluator the attributes that any criteria checks against should be added to the Preferences definition. 
 
 __Need to create a new section about the Controller for the API Layer__
+
+
+
+### JSON Input
+
+Please look at the schema, `Criteria-Weights-Schema.json` that is in the schedule evaluator C sharp Project. For an example of what is valid JSON for this schema please look at the bottom of the aforementioned file, or look in the JSONCriteriaWeights folder that has several examples.

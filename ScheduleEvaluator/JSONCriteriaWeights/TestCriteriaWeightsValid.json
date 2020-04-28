@@ -1,0 +1,19 @@
+{
+  "Criteria": [
+    {
+      "CriteriaName": "AllPrereqs",
+      "Type": "Advisor",
+      "Weight": 0.8
+    },
+    {
+      "CriteriaName": "MathBreaks",
+      "Type": "Student",
+      "Weight": 0.4
+    },
+    {
+      "CriteriaName": "TimeOfDay",
+      "Type": "Advisor",
+      "Weight": 1.2
+    }
+  ]
+}

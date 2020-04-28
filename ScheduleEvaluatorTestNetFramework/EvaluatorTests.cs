@@ -8,6 +8,7 @@ using System.Linq;
 using Models;
 using System.Data;
 using ScheduleEvaluator.ConcreteCriterias;
+using Newtonsoft.Json.Linq;
 
 namespace ScheduleEvaluatorTestFramework
 {
@@ -23,7 +24,7 @@ namespace ScheduleEvaluatorTestFramework
             conn = new DBConnection();
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("Example")]
         public void ExampleTest()
         {
             const int GENERATED_PLAN_ID = 933; // 
@@ -45,6 +46,12 @@ namespace ScheduleEvaluatorTestFramework
 
             // Include an Assert to signify the test passsing/failing.
             Assert.AreEqual(1, 1);
+        }
+
+        [TestMethod, TestCategory("Constructor")]
+        public void TestConstructorValidSchema() {
+            JObject criteria = JObject.Parse(File.ReadAllText("./../../../ScheduleEvaluator/JSONCriteriaWeights/TestCriteriaWeightsValid.json"));
+            Evaluator eval = new Evaluator(criteria.ToString(), true);
         }
         
         [TestMethod, TestCategory("MathBreaks")]

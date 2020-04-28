@@ -17,6 +17,8 @@ namespace ScheduleEvaluator
         MathBreaks,
         MaxQuarters,
         PreRequisiteOrder,
-        TimeOfDay
+        TimeOfDay,
+        Invalid
     };
+
 }

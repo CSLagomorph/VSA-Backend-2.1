@@ -56,6 +56,20 @@ namespace ScheduleEvaluator
                     throw new ArgumentException("Illegal Criteria Type");
             }
         }
+        public static CritTyp FromString(string criteria)
+        {
+            if (criteria.Equals("AllPrereqs")) return CritTyp.AllPrereqs;
+            if (criteria.Equals("CoreClassesLastYear")) return CritTyp.CoreClassesLastYear;
+            if (criteria.Equals("CoreCreditsAQuarter")) return CritTyp.CoreCreditsAQuarter;
+            if (criteria.Equals("ElectiveRelevancy")) return CritTyp.ElectiveRelevancy;
+            if (criteria.Equals("EnglishStart")) return CritTyp.EnglishStart;
+            if (criteria.Equals("MajorSpecificBreaks")) return CritTyp.MajorSpecificBreaks;
+            if (criteria.Equals("MathBreaks")) return CritTyp.MathBreaks;
+            if (criteria.Equals("MaxQuarters")) return CritTyp.MaxQuarters;
+            if (criteria.Equals("PreRequisiteOrder")) return CritTyp.PreRequisiteOrder;
+            if (criteria.Equals("TimeOfDay")) return CritTyp.TimeOfDay;
+            return CritTyp.Invalid;
+        }
     }
 
 }
