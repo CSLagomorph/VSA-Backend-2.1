@@ -6,7 +6,7 @@ namespace ScheduleEvaluator.ConcreteCriterias
 {
     using Models;
 
-    class PreRequisiteOrder : Criteria
+    public class PreRequisiteOrder : Criteria
     {
         public PreRequisiteOrder(double weight) : base(weight)
         {

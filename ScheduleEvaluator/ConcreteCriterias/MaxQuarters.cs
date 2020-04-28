@@ -6,7 +6,7 @@ namespace ScheduleEvaluator.ConcreteCriterias
 {
     using Models;
 
-    class MaxQuarters : Criteria
+    public class MaxQuarters : Criteria
     {
         public MaxQuarters(double weight) : base(weight)
         {

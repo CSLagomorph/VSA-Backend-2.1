@@ -6,7 +6,7 @@ namespace ScheduleEvaluator.ConcreteCriterias
 {
     using Models;
 
-    class TimeOfDay : Criteria
+    public class TimeOfDay : Criteria
     {
         public TimeOfDay(double weight) : base(weight)
         {

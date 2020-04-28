@@ -7,6 +7,7 @@ using ScheduleEvaluator;
 using System.Linq;
 using Models;
 using System.Data;
+using ScheduleEvaluator.ConcreteCriterias;
 
 namespace ScheduleEvaluatorTestFramework
 {
@@ -44,6 +45,97 @@ namespace ScheduleEvaluatorTestFramework
 
             // Include an Assert to signify the test passsing/failing.
             Assert.AreEqual(1, 1);
+        }
+        
+        [TestMethod, TestCategory("MathBreaks")]
+        public void TestMathBreaksFromDataBase() {
+            const int GENERATED_PLAN_ID = 933; // Contains breaks in the math sequence
+            const int PARAMETER_SET_ID = 213;
+            ScheduleModel sm = getScheduleFromDB(GENERATED_PLAN_ID); // Replace the int here with the actual schedule ID
+            Evaluator eval = new Evaluator();
+
+            // Construct a preference set.
+            Preferences pref = GetPreferencesFromDB(PARAMETER_SET_ID); // Replace the int here with an actual preference set ID
+
+            // Associate the schedule with a given preference set:
+            sm.PreferenceSet = pref;
+            Criteria mb = new MathBreaks(2.0);
+            double result = mb.getResult(sm);
+            Assert.AreEqual(result, 0.0);
+        }
+
+        [TestMethod, TestCategory("MathBreaks")]
+        public void TestMathBreaksValidSchedule() {
+            const int MATH_DEPT = 54;
+            ScheduleModel sm = new ScheduleModel
+            {
+                Quarters = new List<Quarter> {
+                    new Quarter{
+                        Id = "1",
+                        Courses = new List<Course>{
+                            new Course{DepartmentID = MATH_DEPT}
+                        }
+                    },
+                    new Quarter{
+                        Id = "2",
+                        Courses = new List<Course>{ 
+                            new Course{DepartmentID = MATH_DEPT}
+                        }
+                    },
+                    new Quarter{ 
+                        Id = "3",
+                        Courses = new List<Course>{ 
+                            new Course{DepartmentID = MATH_DEPT}
+                        }
+                    },
+                    new Quarter{ 
+                        Id = "4",
+                        Courses = new List<Course>{ 
+                            new Course{DepartmentID = MATH_DEPT + 1}
+                        }
+                    },
+                }
+            };
+            Criteria mb = new MathBreaks(1.0);
+            double result = mb.getResult(sm);
+            Assert.AreEqual(1.0, result);
+        }
+
+        [TestMethod, TestCategory("MathBreaks")]
+        public void TestMathBreaksInvalidSchedule() {
+            const int MATH_DEPT = 54;
+            ScheduleModel sm = new ScheduleModel
+            {
+                Quarters = new List<Quarter> {
+                    new Quarter{
+                        Id = "1",
+                        Courses = new List<Course>{
+                            new Course{DepartmentID = MATH_DEPT}
+                        }
+                    },
+                    new Quarter{
+                        Id = "2",
+                        Courses = new List<Course>{
+                            new Course{DepartmentID = MATH_DEPT + 1}
+                        }
+                    },
+                    new Quarter{
+                        Id = "3",
+                        Courses = new List<Course>{
+                            new Course{DepartmentID = MATH_DEPT}
+                        }
+                    },
+                    new Quarter{
+                        Id = "4",
+                        Courses = new List<Course>{
+                            new Course{DepartmentID = MATH_DEPT + 1}
+                        }
+                    },
+                }
+            };
+            Criteria mb = new MathBreaks(1.0);
+            double result = mb.getResult(sm);
+            Assert.AreEqual(0.0, result);
         }
 
         // These DB methods ARE NOT TESTED.
@@ -123,6 +215,17 @@ namespace ScheduleEvaluatorTestFramework
             };
 
             return result;
+        }
+
+        private void WriteScheduleToDebug(ScheduleModel sm) {
+            foreach (Quarter q in sm.Quarters)
+            {
+                Console.WriteLine("Quarter: " + q.Year);
+                foreach (Course c in q.Courses)
+                {
+                    Console.WriteLine("\tCourse: " + c.Description);
+                }
+            }
         }
 
         private Exception ArgumentException(string v)

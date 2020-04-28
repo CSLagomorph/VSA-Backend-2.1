@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "title": "JSON Schema for Inputting Criteria for the Evaluator",
+
+  "type": "object",
+
+  "properties": {
+    "Criteria": {
+      "type": "array",
+      "description": "An Array of Criteria Objects",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": [
+        {
+          "type": "object",
+          "description": "A single Criteria",
+          "properties": {
+            "CriteriaName": {
+              "type": "string",
+              "enum": [
+                "AllPrereqs",
+                "CoreClassesLastYear",
+                "CoreCreditsAQuarter",
+                "ElectiveRelevancy",
+                "EnglishStart",
+                "MajorSpecificBreaks",
+                "MathBreaks",
+                "MaxQuarters",
+                "PreRequisiteOrder",
+                "TimeOfDay"
+              ],
+              "description": "The name of the criteria, must match one of the criteria types in the enum"
+            },
+            "Type": {
+              "type": "string",
+              "enum": [ "Advisor", "Student", "Admin?" ],
+              "description": "Who Defined this criteria? Must be one of the type defined in the enumeration"
+            },
+            "Weight": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "additionalProperties": false
+}

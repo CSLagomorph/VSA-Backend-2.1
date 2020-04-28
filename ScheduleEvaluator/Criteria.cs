@@ -9,7 +9,7 @@ namespace ScheduleEvaluator
 {
     using Models;
 
-    abstract class Criteria
+    public abstract class Criteria
     {
         public readonly double weight;
         public Criteria(double weight) {

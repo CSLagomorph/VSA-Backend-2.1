@@ -6,11 +6,10 @@ namespace ScheduleEvaluator.ConcreteCriterias
 {
     using Models;
 
-    class ElectiveRelevancy : Criteria
+    public class ElectiveRelevancy : Criteria
     {
        public ElectiveRelevancy(double weight) : base(weight)
         {
-            throw new NotImplementedException();
         }
 
         public override double getResult(ScheduleModel s)

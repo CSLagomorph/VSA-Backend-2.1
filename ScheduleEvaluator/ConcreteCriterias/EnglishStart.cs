@@ -6,7 +6,7 @@ namespace ScheduleEvaluator.ConcreteCriterias
 {
     using Models;
 
-    class EnglishStart : Criteria
+    public class EnglishStart : Criteria
     {
         const int ENGLISH_DEPARTMENT = 28;
         public EnglishStart(double weight) : base(weight)
