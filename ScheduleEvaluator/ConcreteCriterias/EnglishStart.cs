@@ -8,7 +8,7 @@ namespace ScheduleEvaluator.ConcreteCriterias
 
     public class EnglishStart : Criteria
     {
-        const int ENGLISH_DEPARTMENT = 28;
+        readonly List<int> ENGLISH_DEPARTMENT = new List<int>(){28, 3}; // ESL courses also count as English
         public EnglishStart(double weight) : base(weight)
         {
         }
@@ -25,14 +25,18 @@ namespace ScheduleEvaluator.ConcreteCriterias
             {
                 currentquarter++;
                 foreach (Course c in q.Courses) {
-                    if (c.DepartmentID == ENGLISH_DEPARTMENT)
+                    if (this.ENGLISH_DEPARTMENT.Contains(c.DepartmentID))
                     {
-                        if (currentquarter > 1) return 0;
+                        if (currentquarter > 4)
+                        {
+                            return 0;
+                        }
+                        else return 1 * this.weight;
                     }
                 }
             }
-            // No english courses or school with dept ID that is not in the consts
-            return 1;
+            //no english course found
+            return 0;
         }
     }
 }

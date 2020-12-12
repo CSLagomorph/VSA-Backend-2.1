@@ -39,11 +39,12 @@
         public Schedule CreateSchedule(bool preferShortest)
         {
             List<Job> majorCourses = RequiredCourses.GetList(0);
-            
+
 
             //Find the major courses with the longest prereq network. How to find it? Basically, create a new sortedList 
             //for each major course separately and process them one at a time.
             var prereqLists = new List<SortedDictionary<int, List<Job>>>();
+            var addedJobs = new List<int>();
             for (int i = 0; i < majorCourses.Count; i++)
             {
                 var sortedPrereqs = new SortedDictionary<int, List<Job>>();
@@ -51,15 +52,18 @@
                 AddPrerequisites(job, sortedPrereqs, preferShortest, 0);
                 prereqLists.Add(sortedPrereqs);
             }
-
             //now, sort the prereqsList based on the longest path
-            var prereqLongest = prereqLists.OrderByDescending(s => s.Count);
-            foreach (SortedDictionary<int, List<Job>> prereqSeq in prereqLongest)
+            var prereqLongest = prereqLists.OrderByDescending(s => s.Count).ToList();
+            var merged = new SortedDictionary<int, List<Job>>();
+            foreach (SortedDictionary<int, List<Job>> sortedDictionary in prereqLongest)
             {
-                ScheduleCourses(prereqSeq);
+                merged = MergeDictionaries(merged, sortedDictionary);
             }
 
-            Schedule = GetBusyMachines(); 
+            ScheduleCourses(merged);
+
+
+            Schedule = GetBusyMachines();
             return new Schedule()
             {
                 Courses = this.Schedule,
@@ -67,13 +71,45 @@
             };
         }
 
+        public static SortedDictionary<int, List<Job>> MergeDictionaries(SortedDictionary<int, List<Job>> merged, SortedDictionary<int, List<Job>> sortedDictionary)
+        {
+            var targt = merged;
+            foreach (KeyValuePair<int, List<Job>> keyValuePair in sortedDictionary)
+            {
+                if (merged.ContainsKey(keyValuePair.Key))
+                {
+                    foreach (var job in keyValuePair.Value)
+                    {
+                        if (!merged[keyValuePair.Key].Contains(job))
+                        {
+                            merged[keyValuePair.Key].Add(job);
+                        }
+
+                    }
+                }
+                else
+                {
+                    merged.Add(keyValuePair.Key, keyValuePair.Value);
+                }
+            }
+
+            return merged;
+
+        }
+
         private void ScheduleCourses(SortedDictionary<int, List<Job>> jobs)
         {
+            int currentLevel = 0;
             foreach (var kvp in jobs)
             {
+                currentLevel++;
                 foreach (var job in kvp.Value)
                 {
-                    ScheduleCourse(job);
+                    var quarter = ScheduleCourse(job, currentLevel);
+                    if (quarter > currentLevel)
+                    {
+                        currentLevel = quarter;
+                    }
                 }
             }
         }

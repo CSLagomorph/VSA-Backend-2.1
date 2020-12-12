@@ -16,6 +16,7 @@
     {
         private OpenShopGASchedulerSettings CurrentBestFit = null;
         private Models.Preferences Preferences = null;
+        private int parameterId;
         #region Constructor
         //------------------------------------------------------------------------------
         // 
@@ -27,6 +28,7 @@
         {
             this.CurrentBestFit = currentBestFit;
             this.Preferences = preferences;
+            this.parameterId = paramID;
             SetUp(paramID);
             MakeStartingPoint();
             InitDegreePlan();
@@ -43,14 +45,27 @@
         public Schedule CreateSchedule(bool preferShortest)
         {
             List<Job> majorCourses = RequiredCourses.GetList(0);
-            SortedDictionary<int, List<Job>> jobs = new SortedDictionary<int, List<Job>>();
+
+
+            //Find the major courses with the longest prereq network. How to find it? Basically, create a new sortedList 
+            //for each major course separately and process them one at a time.
+            var prereqLists = new List<SortedDictionary<int, List<Job>>>();
             for (int i = 0; i < majorCourses.Count; i++)
             {
+                var sortedPrereqs = new SortedDictionary<int, List<Job>>(Comparer<int>.Create((x, y) => y.CompareTo(x)));
                 Job job = majorCourses[i];
-                AddPrerequisites(job, jobs, preferShortest, 0);
+                AddPrerequisites(job, sortedPrereqs, preferShortest, -10);
+                prereqLists.Add(sortedPrereqs);
+            }
+            //now, sort the prereqsList based on the longest path
+            var prereqLongest = prereqLists.OrderByDescending(s => s.Count).ToList();
+            var merged = new SortedDictionary<int, List<Job>>(Comparer<int>.Create((x, y) => y.CompareTo(x)));
+            foreach (SortedDictionary<int, List<Job>> sortedDictionary in prereqLongest)
+            {
+                merged = LongestPathScheduler.MergeDictionaries(merged, sortedDictionary);
             }
 
-            return FindBestSchedule(jobs, 4, 100, 25, this.CurrentBestFit);
+            return FindBestSchedule(merged, 20, 100, 45, this.CurrentBestFit);
         }
 
         public Schedule FindBestSchedule(SortedDictionary<int, List<Job>> jobs, int level = 20, int populationSize = 100, int topPercentToKeep = 80, OpenShopGASchedulerSettings currentBestFit = null)
@@ -60,11 +75,13 @@
             var rand = new Random();
             for (int i = 0; i < populationSize; i++)
             {
-                var chromosome = ScheduleCourses(jobs, true);
+                SetUp(this.parameterId);
+                var chromosome = ScheduleCourses(jobs, i > 0);
                 var settings = new OpenShopGASchedulerSettings() { Chromosome = chromosome };
+                Schedule = GetBusyMachines();
                 var sched = new Schedule()
                 {
-                    Courses = this.Schedule,
+                    Courses = CopyMachines(this.Schedule),
                     SchedulerName = nameof(OpenShopGAScheduler),
                     ScheduleSettings = settings,
                 };
@@ -75,6 +92,20 @@
 
             var fittest = SelectFittest(populationSet, level, topPercentToKeep, currentBestFit);
             return fittest.OrderByDescending(s => s.Rating).First();
+        }
+
+        private List<Machine> CopyMachines(List<Machine> schedule)
+        {
+            var copied = new List<Machine>();
+            foreach (Machine machine in schedule)
+            {
+                var copiedMachine = new Machine(machine.GetYear(), machine.GetQuarter(), machine.GetDateTime(),
+                                                machine.jobs);
+                copiedMachine.SetCurrentJobProcessing(machine.GetCurrentJobProcessing());
+                copied.Add(copiedMachine);
+            }
+
+            return copied;
         }
 
         private double GetRating(Schedule sched)
@@ -100,10 +131,14 @@
             }
             else
             {
+                SetUp(this.parameterId);
+
                 ScheduleCourse(currentBestFit.Chromosome);
+                Schedule = GetBusyMachines();
+
                 topSchedule = new Schedule()
                 {
-                    Courses = this.Schedule,
+                    Courses = CopyMachines(this.Schedule),
                     SchedulerName = nameof(OpenShopGAScheduler),
                     ScheduleSettings = currentBestFit,
                 };
@@ -112,11 +147,8 @@
             }
 
             var cutoff = populationSet.Count * topPercentToKeep / 100;
-            populationSet = populationSet.OrderByDescending(s => s.Rating).Take(cutoff).ToList();
-            if (populationSet.Contains(topSchedule))
-            {
-                populationSet.Remove(topSchedule);
-            }
+            var safePop = populationSet;
+
             List<Schedule> offSprings = new List<Schedule>();
             while (populationSet.Count > 0)
             {
@@ -128,12 +160,14 @@
                     //mutate (swap with some other schedule in the population)
                     var randomPop = rand.Next(populationSet.Count - 1);
                     var randomToMutate = populationSet[randomPop];
-                    var mutation = GetCrossOvers(crossOver, randomToMutate.ScheduleSettings, 1);
-
+                    var mutation = Mutate(crossOver, randomToMutate.ScheduleSettings, 1);
+                    SetUp(this.parameterId);
                     ScheduleCourse(mutation.First().Chromosome);
+                    Schedule = GetBusyMachines();
+
                     var offspring = new Schedule()
                     {
-                        Courses = this.Schedule,
+                        Courses = CopyMachines(this.Schedule),
                         SchedulerName = nameof(OpenShopGAScheduler),
                         ScheduleSettings = crossOver,
                     };
@@ -146,7 +180,49 @@
 
             }
 
-            return SelectFittest(offSprings, level - 1);
+            safePop.AddRange(offSprings);
+            var nextGen = safePop.OrderByDescending(s => s.Rating).Take(cutoff).ToList();
+            var initialSize = safePop.Count;
+
+            //get some random performers too
+            var numRandoms = (int) safePop.Count * 0.1;
+            var randGen = new Random();
+            for (int i = 0; i < numRandoms; i++)
+            {
+                var randIndx = randGen.Next(safePop.Count);
+                nextGen.Add(safePop[randIndx]);
+            }
+            return SelectFittest(nextGen, level - 1, 25);
+        }
+
+        private List<OpenShopGASchedulerSettings> Mutate(OpenShopGASchedulerSettings crossOver, OpenShopGASchedulerSettings scheduleSettings, int i)
+        {
+            var combined = new List<Job>();
+            combined.AddRange(crossOver.Chromosome);
+            combined.AddRange(scheduleSettings.Chromosome);
+           var unique = new List<Job>();
+           foreach (Job job in combined)
+           {
+               if (!unique.Contains(job))
+               {
+                    unique.Add(job);
+               }
+           }
+           return new List<OpenShopGASchedulerSettings>()
+           {
+               new OpenShopGASchedulerSettings()
+               {
+                   Chromosome = unique
+               }
+           };
+        }
+
+        private void ResetQuarters()
+        {
+            foreach (MachineNode machineNode in this.Quarters)
+            {
+                machineNode.ResetMachines();
+            }
         }
 
         private List<OpenShopGASchedulerSettings> GetCrossOvers(OpenShopGASchedulerSettings parent1, OpenShopGASchedulerSettings parent2, int count)
@@ -195,26 +271,61 @@
         private List<Job> ScheduleCourses(SortedDictionary<int, List<Job>> jobs, bool mutate)
         {
             var courseDna = new List<Job>();
-            //We shouldn't shuffle the actual order of the prereqs, only the courses at the same level
-            foreach (var kvp in jobs)
+            var coinflip = new Random();
+            int currentLevel = 0;
+            if (!mutate)
             {
-                IEnumerable<Job> orderedJobs = kvp.Value;
 
-
-                foreach (var job in orderedJobs)
+                foreach (var kvp in jobs)
                 {
-                    if (!courseDna.Contains(job))
+                    var increment = coinflip.Next(2);
+                    if (increment == 0)
                     {
-                        courseDna.Add(job);
+                        currentLevel++;
                     }
-                    ScheduleCourse(job);
+                    foreach (var job in kvp.Value)
+                    {
+                        if (!courseDna.Contains(job))
+                        {
+                            courseDna.Add(job);
+                        }
+                        currentLevel = ScheduleCourse(job, currentLevel);
+                    }
                 }
             }
-            if (mutate)
+            else
             {
-                //shuffle the order of courses for each level
-                courseDna = courseDna.Shuffle().ToList();
+                List<Job> jobsToSchedule = new List<Job>();
+                foreach (KeyValuePair<int, List<Job>> job in jobs)
+                {
+                    foreach (Job job1 in job.Value)
+                    {
+                        jobsToSchedule.Add(job1);
+                    }
+                }
+
+                jobsToSchedule = jobsToSchedule.Shuffle().ToList();
+                courseDna = jobsToSchedule;
+                ScheduleCourse(jobsToSchedule);
+                //foreach (var kvp in jobs)
+                //{
+                //    var increment = coinflip.Next(2);
+                //    if (increment == 0)
+                //    {
+                //        currentLevel++;
+                //    }
+                //    var shuffled = kvp.Value.Shuffle().ToList();
+                //    foreach (var job in shuffled)
+                //    {
+                //        if (!courseDna.Contains(job))
+                //        {
+                //            courseDna.Add(job);
+                //            currentLevel = ScheduleCourse(job, currentLevel);
+                //        }
+                //    }
+                //}
             }
+
             return courseDna;
         }
 
@@ -222,7 +333,7 @@
         {
             foreach (var job in orderedJobs)
             {
-                ScheduleCourse(job);
+                ScheduleCourse(job, 0);
             }
         }
 

@@ -23,10 +23,9 @@
             SetUp(paramID);
             MakeStartingPoint();
             InitDegreePlan();
-            CreateSchedule(preferShortest);
         }
         #endregion
-        
+
         #region Scheduling Algorithm
         //------------------------------------------------------------------------------
         // Order in which the scheduler processes the jobs is not fixed in advance
@@ -38,13 +37,23 @@
         {
             List<Job> majorCourses = RequiredCourses.GetList(0);
             SortedDictionary<int, List<Job>> jobs = new SortedDictionary<int, List<Job>>();
+            var addedJobs = new List<int>();
             for (int i = 0; i < majorCourses.Count; i++)
             {
                 Job job = majorCourses[i];
+                
                 AddPrerequisites(job, jobs, preferShortest, 0);
             }
 
+            foreach (KeyValuePair<int, List<Job>> keyValuePair in jobs)
+            {
+                foreach (var val in keyValuePair.Value)
+                {
+                    Console.WriteLine($"{keyValuePair.Key};{val.GetID()}");
+                }
+            }
             ScheduleCourses(jobs);
+
             Schedule = GetBusyMachines(); //SUGGEST BETTER NAMING CONVENTION?//
                                           //return proposed schedule
             return new Schedule()
@@ -56,12 +65,12 @@
 
         private void ScheduleCourses(SortedDictionary<int, List<Job>> jobs)
         {
-
+            var minQ = 0;
             foreach (var kvp in jobs)
             {
                 foreach (var job in kvp.Value)
                 {
-                    ScheduleCourse(job);
+                    minQ = ScheduleCourse(job, minQ);
                 }
             }
         }

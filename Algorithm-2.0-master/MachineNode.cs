@@ -104,14 +104,24 @@ namespace Scheduler {
             }
             return scheduledMachines;
         }
+
+        //------------------------------------------------------------------------------
+        // 
+        // returns all machines for final plan used by scheduler
+        // 
+        //------------------------------------------------------------------------------
+        public void ResetMachines()
+        {
+            this.machines = new List<Machine>();
+        }
         #endregion
 
         #region Setters/Adjusters
-            //------------------------------------------------------------------------------
-            // 
-            // temporary until getcreditsscheduled is implemented
-            // 
-            //------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------
+        // 
+        // temporary until getcreditsscheduled is implemented
+        // 
+        //------------------------------------------------------------------------------
         public void AddClassesScheduled(int k) {
             classesScheduled += k;
         }

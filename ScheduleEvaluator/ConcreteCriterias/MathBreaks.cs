@@ -17,28 +17,34 @@ namespace ScheduleEvaluator.ConcreteCriterias
         {
             Quarter prevQuarter = null;
             int totalGap = 0;
+            var startMath = false;
+            var contMissing = 0;
             foreach (Quarter q in s.Quarters)
             {
                 if (hasMathCourse(q))
                 {
-                    if (prevQuarter == null)
+                    contMissing = 0;
+                    if (!startMath)
                     {
-                        prevQuarter = q;
-                        continue;
+                        startMath = true;
                     }
 
-                    Quarter nextQuarter = q;
-
-
-                    int prevQID = Int32.Parse(prevQuarter.Id);
-                    int nextQID = Int32.Parse(nextQuarter.Id);
-                    if (prevQID + 1 != nextQID)
-                        totalGap += nextQID - prevQID;
-                    prevQuarter = nextQuarter;
-
+                }
+                else
+                {
+                    contMissing++;
+                    //its possible we finished all required math classes
+                    if (contMissing > 4)
+                    {
+                        continue;
+                    }
+                    if (startMath)
+                    {
+                        totalGap++;
+                    }
                 }
             }
-            return (totalGap > 0 ? 0.0 : 1.0) * weight;
+            return (totalGap > 3 ? 0.0 : 1.0) * weight;
         }
 
         private Boolean hasMathCourse(Quarter q)

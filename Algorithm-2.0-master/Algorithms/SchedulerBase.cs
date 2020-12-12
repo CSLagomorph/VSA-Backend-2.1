@@ -56,13 +56,18 @@ namespace Scheduler.Algorithms
             Schedule = new List<Machine>(); //Courses
             completedPrior = new List<Job>();
             unableToSchedule = new List<Job>();
-
-            StudentPreferences = new Preferences(paramId);
-            DeterminePlanLength(StudentPreferences.getQuarters(), StudentPreferences.getSummer());
+            if (this.StudentPreferences == null)
+            {
+                StudentPreferences = new Preferences(paramId);
+            }
+            DeterminePlanLength(50, StudentPreferences.getSummer());
             InitializeMachineNodes();
             InitMachines();
             normalizeMachines(); //Disposable after live data
-            InitNetwork();
+            if (this.PrerequisiteNetwork == null)
+            {
+                InitNetwork();
+            }
         }
 
         protected void DeterminePlanLength(int quartersDeclared, bool summerIntent)
@@ -335,14 +340,14 @@ namespace Scheduler.Algorithms
         }
         #endregion
 
-        protected void ScheduleCourse(Job j)
+        protected int ScheduleCourse(Job j, int minQuarter)
         {
             if (IsScheduled(j))
             {
-                return;
+                return minQuarter;
             }
             //we're always being called in order, no need to check for prereqs
-            for (int i = 0; i < Quarters.Count; i++)
+            for (int i = minQuarter; i < Quarters.Count; i++)
             {
                 MachineNode mn = Quarters[i];
                 // Check the number of credits scheduled per quarter make sure it does not exceed preference.
@@ -376,10 +381,12 @@ namespace Scheduler.Algorithms
                         //mn.AddClassesScheduled(1);
                         mn.AddClassesScheduled(j);
                         Schedule.Add(m);
-                        return;
+                        return i;
                     }
                 }
             }
+
+            return minQuarter;
         }
 
         protected void AddPrerequisites(Job job, SortedDictionary<int, List<Job>> jobs, bool preferShortest, int currentLevel)
@@ -392,11 +399,16 @@ namespace Scheduler.Algorithms
                 {
                     jobs.Add(currentLevel, new List<Job>());
                 }
-                jobs[currentLevel].Add(job);
+
+                if (!jobs[currentLevel].Contains(job))
+                {
+                    jobs[currentLevel].Add(job);
+                }
+               
             }
             else
             {
-                int nextLevel = currentLevel - 1;
+                int nextLevel = currentLevel + 1;
                 int selectedGroup;
                 if (preferShortest)
                 {
@@ -420,7 +432,10 @@ namespace Scheduler.Algorithms
                     jobs.Add(currentLevel, new List<Job>());
                 }
                 //now finally, add the course
-                jobs[currentLevel].Add(job);
+                if (!jobs[currentLevel].Contains(job))
+                {
+                    jobs[currentLevel].Add(job);
+                }
             }
         }
 

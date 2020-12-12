@@ -29,10 +29,25 @@ namespace ScheduleEvaluator
         private Criteria[] criterias;
         private HttpClient client;
         // Constructor for the evaluator. Creates all of the criteria objects and stores in criterias. 
-        // For now I dont believe that the criterias should be mutable. 
         public Evaluator() {
-            CritTyp[] criteriaTypes = { CritTyp.CoreCreditsAQuarter, CritTyp.MaxQuarters, CritTyp.TimeOfDay, CritTyp.CoreClassesLastYear, CritTyp.PreRequisiteOrder, CritTyp.MathBreaks, CritTyp.MajorSpecificBreaks, CritTyp.EnglishStart };
-            double[] weights = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+            CritTyp[] criteriaTypes = { 
+                CritTyp.CoreCreditsAQuarter, 
+                CritTyp.MaxQuarters, 
+                CritTyp.CoreClassesLastYear, 
+                CritTyp.PreRequisiteOrder, 
+                CritTyp.MathBreaks, 
+                CritTyp.MajorSpecificBreaks,
+                CritTyp.EnglishStart, 
+                CritTyp.AllPrereqs };
+            double[] weights = { 
+                1.0, 
+                2.0, 
+                4.0, 
+                5.0, 
+                5.0, 
+                3.0, 
+                3.0, 
+                5.0 };
             CriteriaFactory fact;
             try
             {
@@ -106,7 +121,8 @@ namespace ScheduleEvaluator
             double totalWeight = 0;
             foreach (Criteria c in criterias)
             {
-                result += c.getResult(s);
+                var score = c.getResult(s);
+                result += score;
                 totalWeight += c.weight;
             }
             return result / totalWeight;

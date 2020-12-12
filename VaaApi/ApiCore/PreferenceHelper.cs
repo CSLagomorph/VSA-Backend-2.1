@@ -53,7 +53,7 @@ namespace ApiCore
 
         private static int SaveSchedule(int id, bool preferShortest, Models.Preferences preferences)
         {
-            var scheduler = new OpenShopGAScheduler(id, preferences, preferShortest);
+            var scheduler = new OpenShopGAScheduler(id,preferences, preferShortest);
             var schedule = scheduler.CreateSchedule(preferShortest);
 
             var scheduleModel = schedule.ConvertToScheduleModel();

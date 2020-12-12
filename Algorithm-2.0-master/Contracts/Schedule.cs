@@ -34,7 +34,7 @@ namespace Scheduler.Contracts
                     {
                         Year = kvp.Key,
                         Title = $"{DateTime.UtcNow.Year + kvp.Key}-{quarter.Key.ToString()}",
-                        Id = $"{kvp.Key}-{quarter.Key}",
+                        Id = $"{quarter.Key}",
                         Courses = new List<Course>(),
                         QuarterKey = quarter.Key
                     };

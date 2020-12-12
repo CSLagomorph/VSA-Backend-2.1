@@ -17,6 +17,12 @@ namespace DataGenerator
     using DBConnection = Scheduler.DBConnection;
     using Preferences = Models.Preferences;
 
+    public class Combination
+    {
+        public int SchoolId { get; set; }
+        public int MajorId { get; set; }
+    }
+
     [TestClass]
     public class DataGenerator
     {
@@ -35,35 +41,45 @@ namespace DataGenerator
         {
             var insertedList = new List<int>();
             var coursePrefList = new List<CourseObject>();
-            //var schools = new List<string>(){ "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16" };
-            //var majors = new List<string>(){ "1", "2", "3", "4", "6", "7", "8", "9", "10", "11", "12", "13", "14", "16", "17", "18", "19", "20", "21", "22", "23", "24", "26", "27", "28", "29", "30", "31", "32" };
-            var schools = new List<string>(){"1"};
-            var majors = new List<string>(){"1"};
-            foreach (string school in schools)
+            var combinations = new List<Combination>()
             {
-                foreach (string major in majors)
+                new Combination(){MajorId = 22, SchoolId = 6},
+                new Combination(){MajorId = 32, SchoolId = 3},
+                //new Combination(){MajorId = 11, SchoolId = 1},
+                //new Combination(){MajorId = 16, SchoolId = 1},
+                //new Combination(){MajorId = 20, SchoolId = 1},
+                //new Combination(){MajorId = 20, SchoolId = 2},
+                //new Combination(){MajorId = 22, SchoolId = 6},
+                //new Combination(){MajorId = 40, SchoolId = 1},
+                //new Combination(){MajorId = 41, SchoolId = 15},
+                //new Combination(){MajorId = 46, SchoolId = 1},
+                //new Combination(){MajorId = 48, SchoolId = 1}
+            };
+            
+            foreach (var combination in combinations)
+            {
+
+                var courseObj = new CourseObject()
                 {
-                    var courseObj = new CourseObject()
-                    {
-                        school = school,
-                        courses = "5",
-                        credits = "10",
-                        major = major,
-                        quarters = "20",
-                        enrollment = ((int)Constants.EnrollmentType.FullTime).ToString(),
-                        job = ((int)Constants.JobType.Unemployed).ToString(),
-                        summer = "N"
-                    };
-                    coursePrefList.Add(courseObj);
-                    //VaryEnrollment(courseObj, coursePrefList);
-                    //VaryJob(courseObj, coursePrefList);
-                    //VaryCredits(courseObj, coursePrefList);
-                    //VaryMaxCreditsPerQuarter(courseObj, coursePrefList);
-                    GeneratePlan(coursePrefList, insertedList);
-                }
+                    school = combination.SchoolId.ToString(),
+                    courses = "10",
+                    credits = "10",
+                    major = combination.MajorId.ToString(),
+                    quarters = "20",
+                    enrollment = ((int)Constants.EnrollmentType.FullTime).ToString(),
+                    job = ((int)Constants.JobType.Unemployed).ToString(),
+                    summer = "N"
+                };
+                coursePrefList.Add(courseObj);
+                VaryEnrollment(courseObj, coursePrefList);
+                VaryJob(courseObj, coursePrefList);
+                VaryCredits(courseObj, coursePrefList);
+                VaryMaxCreditsPerQuarter(courseObj, coursePrefList);
+                GeneratePlan(coursePrefList, insertedList);
+
             }
-           
-           
+
+
             insertedList.Should().NotBeEmpty();
         }
 
@@ -92,13 +108,13 @@ namespace DataGenerator
             var schedule = new List<int>() { };
             var connection = new DBConnection();
             var eval = new Evaluator();
-            var scheduleQuery = $"select GeneratedPlanId from GeneratedPlan where GeneratedPlanId > 600";
+            var scheduleQuery = $"select GeneratedPlanId from GeneratedPlan where GeneratedPlanId >9238";
             var schedules = connection.ExecuteToDT(scheduleQuery);
             foreach (DataRow schedulesRow in schedules.Rows)
             {
                 schedule.Add((int)schedulesRow["GeneratedPlanId"]);
             }
-            
+
 
             foreach (int scheduleId in schedule)
             {
@@ -106,7 +122,7 @@ namespace DataGenerator
                 var parameterId = (int)connection.ExecuteToDT(parameterQuery).Rows[0]["ParameterSetId"];
 
                 var parameterSetQuery = $"select ParameterSet.MajorID, SchoolID, TimePeriod, MaxNumberOfQuarters, NumberCoreCoursesPerQuarter, CreditsPerQuarter, SummerPreference, DepartmentId from ParameterSet join Major on ParameterSet.MajorID = Major.MajorID" +
-                                        $" join TimePreference on TimePreference.TimePreferenceID = ParameterSet.TimePreferenceID"+ 
+                                        $" join TimePreference on TimePreference.TimePreferenceID = ParameterSet.TimePreferenceID" +
                                         $" where ParameterSetId = {parameterId}";
                 var parameterSetResult = connection.ExecuteToDT(parameterSetQuery);
 
@@ -213,7 +229,7 @@ namespace DataGenerator
 
         private void VaryCredits(CourseObject courseObj, List<CourseObject> coursePrefList)
         {
-            var credits = new List<int>() { 5, 10, 15, 3, 1 };
+            var credits = new List<int>() { 5, 10, 15, 3 };
             foreach (var credit in credits)
             {
                 var newCourseObj = new CourseObject()

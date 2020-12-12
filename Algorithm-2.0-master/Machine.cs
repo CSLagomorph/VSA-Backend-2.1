@@ -24,7 +24,7 @@ namespace Scheduler {
         [JsonProperty]
         private int quarter;
         [JsonIgnore]
-        private List<Job> jobs; //READ: The courses associated to this machine(?)
+        public List<Job> jobs; //READ: The courses associated to this machine(?)
         [JsonProperty]
         private Job currentJobProcessing;
         [JsonProperty]
