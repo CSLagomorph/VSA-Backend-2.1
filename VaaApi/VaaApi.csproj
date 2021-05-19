@@ -462,8 +462,10 @@
   <ItemGroup>
     <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\AssociatesController.cs" />
     <Compile Include="Controllers\CoursesController.cs" />
     <Compile Include="Controllers\PrerequisiteController.cs" />
+    <Compile Include="Controllers\RecommendController.cs" />
     <Compile Include="Controllers\SchoolsController.cs" />
     <Compile Include="Controllers\TestController.cs" />
     <Compile Include="Controllers\PreferencesController.cs" />
@@ -476,6 +478,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
+    <None Include="Properties\PublishProfiles\Qaif latestSettings.pubxml" />
     <None Include="Properties\PublishProfiles\vaaapi - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\vaaapi - ReadOnly - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\vaaapi - Web Deploy.pubxml" />

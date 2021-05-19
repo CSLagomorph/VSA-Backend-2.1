@@ -87,7 +87,7 @@ namespace ScheduleEvaluator.ConcreteCriterias
                 Console.WriteLine("Message: {0}", e.Message);
             }
             return null;
-        }
+         }
 
         public async Task<Dictionary<int, List<CourseNode>>> getCourseNetworks(List<int> courses) {
             HttpResponseMessage resp;

@@ -8,6 +8,8 @@
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using ScheduleEvaluator;
+    using System.Diagnostics;
+    using Models;
 
     /// <summary>
     /// Implements the Open Shop Scheduling algorithm with genetic algorithm
@@ -23,13 +25,16 @@
         // 
         //------------------------------------------------------------------------------
 
-        public OpenShopGAScheduler(int paramID, Models.Preferences preferences, bool preferShortest = true, OpenShopGASchedulerSettings currentBestFit = null)
+        public OpenShopGAScheduler(int paramID, Models.Preferences preferences, bool preferShortest = true, OpenShopGASchedulerSettings currentBestFit = null, bool associatesSchedule=false)
         {
             this.CurrentBestFit = currentBestFit;
             this.Preferences = preferences;
             SetUp(paramID);
             MakeStartingPoint();
-            InitDegreePlan();
+            if(associatesSchedule==true)
+                InitDegreePlan(associatesSchedule);
+            else
+                InitDegreePlan();
         }
         #endregion
 
@@ -74,8 +79,71 @@
             }
 
             var fittest = SelectFittest(populationSet, level, topPercentToKeep, currentBestFit);
+            //printing the ratings of all schedules in the final population set
+            var countSchedule = 0;
+            Debug.WriteLine("Best schedule rating:" + fittest.OrderByDescending(s => s.Rating).First().Rating);
+            //foreach( var s in fittest)
+            //{
+            //    Debug.WriteLine(countSchedule + "th schedule rating: " + s.Rating);
+            //    countSchedule++;
+            //}
+            //comment this function if not used for associate degree schedules
+            //saveAssociateDegreeSchedules(fittest);
             return fittest.OrderByDescending(s => s.Rating).First();
         }
+
+        private void saveAssociateDegreeSchedules(List<Schedule> schedules)
+        {
+            foreach (var schedule in schedules)
+            {
+
+                var scheduleModel = schedule.ConvertToScheduleModel();
+                int insertedId = 0;
+                double rating = schedule.Rating;
+                var prefid = DBPlugin.ExecuteToString("SELECT IDENT_CURRENT('ParameterSet')");
+                var preferenceId = Convert.ToInt32(prefid);
+                try
+                {
+                    var schedulerSettings = JsonConvert.SerializeObject(schedule.ScheduleSettings);
+                    DBPlugin.ExecuteToString(
+                        $"insert into GeneratedPlan (Name, ParameterSetID, DateAdded, LastDateModified, Status, SchedulerName, SchedulerSettings, WeakLabelScore) " +
+                        $"Values ('latest', {preferenceId}, '{DateTime.UtcNow}', '{DateTime.UtcNow}', {1}, '{schedule.SchedulerName}', '{schedulerSettings}', {rating})");
+                    var idString = DBPlugin.ExecuteToString("SELECT IDENT_CURRENT('GeneratedPlan')");
+                    insertedId = Convert.ToInt32(idString);
+                    scheduleModel.Id = insertedId;
+
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
+
+                foreach (Quarter quarter in scheduleModel.Quarters)
+                {
+                    foreach (Course course in quarter.Courses)
+                    {
+                        try
+                        {
+                            DBPlugin.ExecuteToString(
+                                $"insert into StudyPlan (GeneratedPlanID, QuarterID, YearID, CourseID, DateAdded, LastDateModified) " +
+                                $"Values ({insertedId}, {quarter.QuarterKey}, {DateTime.UtcNow.Year + quarter.Year}, {course.Id}, '{DateTime.UtcNow}', '{DateTime.UtcNow}')");
+
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                            throw;
+                        }
+                    }
+
+                }
+
+            }
+               
+
+        }
+
 
         private double GetRating(Schedule sched)
         {

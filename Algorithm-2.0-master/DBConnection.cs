@@ -43,6 +43,7 @@ namespace Scheduler
             myConnection.Open();
             var result = new StringBuilder();
             var reader = cmd.ExecuteReader();
+
             if (!reader.HasRows)
             {
                 result.Append("[]");
@@ -65,7 +66,8 @@ namespace Scheduler
         private void OpenSQLConnection()
         {
 
-            myConnection = new SqlConnection("");
+            //myConnection = new SqlConnection("Data Source=65.175.68.34;Initial Catalog=vsaDev;Persist Security Info=True;User ID=sa;Password=kD$wg&OUrhfC6AMMq6q5Xhj");
+            myConnection = new SqlConnection("Data Source=184.175.93.214;Initial Catalog=vsaDev;Persist Security Info=True;User ID=sa;Password=kD$wg&OUrhfC6AMMq6q5Xhj");
         }
         #endregion
 

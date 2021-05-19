@@ -11,6 +11,7 @@ namespace ApiCore
     using Newtonsoft.Json.Linq;
     using Scheduler;
     using Scheduler.Algorithms;
+    using System.Diagnostics;
 
     public static class PreferenceHelper
     {
@@ -42,16 +43,68 @@ namespace ApiCore
                 SummerPreference = summer == "Y",
                 DepartmentID = department
             };
+            //DBPlugin.ExecuteToString($"insert into ParameterSet (MajorId, SchoolId, JobTypeID, TimePreferenceId, QuarterPreferenceId, DateAdded, NumberCoreCoursesPerQuarter, " +
+            //                         $"MaxNumberOfQuarters, CreditsPerQuarter, SummerPreference, EnrollmentTypeId, Status, LastDateModified) values ({majorId}, {schoolId}, {job}, {1}, {1}, '{DateTime.UtcNow}', {coreCourses}," +
+            //                          $"{quarters}, {creditPerQuarter}, '{summer}', {enrollment}, {1}, '{DateTime.UtcNow}')");
+            Debug.WriteLine(preferences);
+            Console.WriteLine(preferences);
+
             DBPlugin.ExecuteToString($"insert into ParameterSet (MajorId, SchoolId, JobTypeID, TimePreferenceId, QuarterPreferenceId, DateAdded, NumberCoreCoursesPerQuarter, " +
-                                     $"MaxNumberOfQuarters, CreditsPerQuarter, SummerPreference, EnrollmentTypeId, Status, LastDateModified) values ({majorId}, {schoolId}, {job}, {1}, {1}, '{DateTime.UtcNow}', {coreCourses}," +
+                                     $"MaxNumberOfQuarters, CreditsPerQuarter, SummerPreference, EnrollmentTypeId, IsActive, LastDateModified) values ({majorId}, {schoolId}, {job}, {4}, {1}, '{DateTime.UtcNow}', {coreCourses}," +
                                      $"{quarters}, {creditPerQuarter}, '{summer}', {enrollment}, {1}, '{DateTime.UtcNow}')");
+
             var insertedId = DBPlugin.ExecuteToString("SELECT IDENT_CURRENT('ParameterSet')");
             var preferenceId = Convert.ToInt32(insertedId);
             var insertedSchedule = SaveSchedule(preferenceId, preferShortest, preferences);
             return insertedSchedule;
         }
 
-        private static int SaveSchedule(int id, bool preferShortest, Models.Preferences preferences)
+        //Process the preferences for associate degree
+        public static int ProcessAssociatesPreference(CourseObject content, bool preferShortest = true)
+        {
+            var DBPlugin = new DBConnection();
+            var majorId = Convert.ToInt32(content.major);
+            var schoolId = Convert.ToInt32(content.school);
+            var job = Convert.ToInt32(content.job);
+            var enrollment = Convert.ToInt32(content.enrollment);
+            var coreCourses = Convert.ToInt32(content.courses);
+            var quarters = Convert.ToInt32(content.quarters);
+            var creditPerQuarter = Convert.ToInt32(content.credits);
+            var summer = content.summer;
+
+            //get the departmentId
+            var query = "select DepartmentId from Major" +
+                        $" where MajorId = {majorId}";
+
+            var results = DBPlugin.ExecuteToDT(query);
+            var department = (int)results.Rows[0]["DepartmentId"];
+            var preferences = new Models.Preferences()
+            {
+                CoreCoursesPerQuarter = coreCourses,
+                CreditsPerQuarter = creditPerQuarter,
+                MajorID = majorId,
+                MaxQuarters = quarters,
+                QuarterPreference = quarters,
+                SummerPreference = summer == "Y",
+                DepartmentID = department
+            };
+            //DBPlugin.ExecuteToString($"insert into ParameterSet (MajorId, SchoolId, JobTypeID, TimePreferenceId, QuarterPreferenceId, DateAdded, NumberCoreCoursesPerQuarter, " +
+            //                         $"MaxNumberOfQuarters, CreditsPerQuarter, SummerPreference, EnrollmentTypeId, Status, LastDateModified) values ({majorId}, {schoolId}, {job}, {1}, {1}, '{DateTime.UtcNow}', {coreCourses}," +
+            //                          $"{quarters}, {creditPerQuarter}, '{summer}', {enrollment}, {1}, '{DateTime.UtcNow}')");
+            Debug.WriteLine(preferences);
+            Console.WriteLine(preferences);
+
+            DBPlugin.ExecuteToString($"insert into ParameterSet (MajorId, SchoolId, JobTypeID, TimePreferenceId, QuarterPreferenceId, DateAdded, NumberCoreCoursesPerQuarter, " +
+                                     $"MaxNumberOfQuarters, CreditsPerQuarter, SummerPreference, EnrollmentTypeId, IsActive, LastDateModified) values ({majorId}, {schoolId}, {job}, {4}, {1}, '{DateTime.UtcNow}', {coreCourses}," +
+                                     $"{quarters}, {creditPerQuarter}, '{summer}', {enrollment}, {1}, '{DateTime.UtcNow}')");
+
+            var insertedId = DBPlugin.ExecuteToString("SELECT IDENT_CURRENT('ParameterSet')");
+            var preferenceId = Convert.ToInt32(insertedId);
+            var insertedSchedule = SaveSchedule(preferenceId, preferShortest, preferences, true);
+            return insertedSchedule;
+        }
+
+        private static int SaveSchedule(int id, bool preferShortest, Models.Preferences preferences, bool associatesPreference=false)
         {
             var scheduler = new OpenShopGAScheduler(id, preferences, preferShortest);
             var schedule = scheduler.CreateSchedule(preferShortest);
@@ -61,6 +114,9 @@ namespace ApiCore
             int insertedId = 0;
             var DBPlugin = new DBConnection();
             double rating = schedule.Rating;
+            printSchedule(scheduleModel, schedule);
+            Debug.WriteLine(scheduler.GetUnscheduledCourses());
+
             try
             {
                 var schedulerSettings = JsonConvert.SerializeObject(schedule.ScheduleSettings);
@@ -95,11 +151,51 @@ namespace ApiCore
                         throw;
                     }
                 }
+
+            }
+
+            //temporarily make the inserted id to be 1
+            //insertedId = 1;
+
+            //save the plan if needed
+            //var idString = DBPlugin.ExecuteToString("SELECT IDENT_CURRENT('GeneratedPlan')");
+            //insertedId = Convert.ToInt32(idString);
+            scheduleModel.Id = insertedId;
+            return insertedId;
+        }
+
+
+        private static void printSchedule(ScheduleModel sm, Scheduler.Contracts.Schedule s)
+        {
+            try
+            {
+                var schedulerSettings = JsonConvert.SerializeObject(s.ScheduleSettings);
+                Debug.WriteLine("scheduler name" + s.SchedulerName + " scheduler settings:" + schedulerSettings + "weak label score " + s.Rating + "   ");
                 
             }
-          
-            //save the plan if needed
-            return insertedId;
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                throw;
+            }
+
+            foreach (Quarter quarter in sm.Quarters)
+            {
+                foreach (Course course in quarter.Courses)
+                {
+                    try
+                    {
+                        Debug.WriteLine(" Quarter id:" + quarter.QuarterKey + "   yEAR:" + quarter.Year + "    CourseID:" + course.Id);
+                        
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.WriteLine(e);
+                        throw;
+                    }
+                }
+
+            }
         }
     }
 }

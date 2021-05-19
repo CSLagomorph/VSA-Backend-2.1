@@ -2,6 +2,7 @@
 
 namespace Scheduler {
     using System;
+    using System.Diagnostics;
 
     public class DegreePlan {
 
@@ -31,6 +32,7 @@ namespace Scheduler {
             foreach (var job in major)
             {
                 Console.WriteLine($"Prereq courses {job.GetID()}");
+                Debug.WriteLine($"Inside degree plan creation: Prereq courses { job.GetID()}");
             }
 
             plan.Add(major);
